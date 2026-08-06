@@ -80,7 +80,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-gray-500 dark:text-gray-400 text-lg mb-8 max-w-xl mx-auto">
-            全栈开发者 / 开源爱好者 / 摄影爱好者
+            全栈开发者 / 开源爱好者 / AI研究生
             <br />
             在这里分享技术、思考与生活
           </p>

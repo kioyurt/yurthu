@@ -20,7 +20,7 @@ const skills = [
 
 const hobbies = [
   { icon: CodeXml, label: "编程" },
-  { icon: Camera, label: "摄影" },
+  { icon: Camera, label: "AI" },
   { icon: Music, label: "音乐" },
   { icon: Coffee, label: "咖啡" },
   { icon: BookOpen, label: "阅读" },
@@ -28,10 +28,10 @@ const hobbies = [
 ];
 
 const timeline = [
-  { period: "2020 - 2022", title: "计算机科学学士", desc: "某大学 · 计算机学院" },
-  { period: "2022 - 2024", title: "前端开发工程师", desc: "某互联网公司 · 基础架构组" },
-  { period: "2024 - 2025", title: "全栈开发工程师", desc: "某创业公司 · 核心开发" },
-  { period: "2025 - 至今", title: "独立开发者 / 自由职业", desc: "做自己的产品，写自己的代码" },
+  { period: "2022 - 2026", title: "人工智能学士", desc: " 信息工程学院" },
+  { period: "2025 - 2026", title: "量化开发工程师", desc: "某互联网公司 · 基础架构组" },
+  { period: "2025 - 2026", title: "全栈开发工程师", desc: "某创业公司 · 核心开发" },
+  { period: "2022 - 至今", title: "独立开发者 / 自由职业", desc: "做自己的产品，写自己的代码" },
 ];
 
 export default function AboutPage() {
@@ -49,15 +49,15 @@ export default function AboutPage() {
         >
           👨‍💻
         </motion.div>
-        <h2 className="text-2xl font-bold mb-1">Your Name</h2>
-        <p className="text-indigo-500 font-medium mb-3">Full-Stack Developer</p>
+        <h2 className="text-2xl font-bold mb-1">kioyurt</h2>
+        <p className="text-indigo-500 font-medium mb-3">AI Researcher and a student</p>
         <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
           热爱技术，喜欢用代码创造美好的事物。相信开源的力量，
           享受学习和分享的过程。白天写代码，晚上看星星。✨
         </p>
         <div className="flex items-center justify-center gap-3 text-sm text-gray-400 mb-6">
-          <span className="flex items-center gap-1"><MapPin size={14} /> 中国 · 上海</span>
-          <span className="flex items-center gap-1"><Mail size={14} /> hello@example.com</span>
+          <span className="flex items-center gap-1"><MapPin size={14} /> 中国 · 陕西</span>
+          <span className="flex items-center gap-1"><Mail size={14} /> 456456780qwe@gmail.com</span>
         </div>
         <div className="flex justify-center gap-4">
           {[GithubIcon, TwitterIcon, Globe].map((Icon, i) => (

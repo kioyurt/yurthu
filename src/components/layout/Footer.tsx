@@ -17,7 +17,7 @@ export default function Footer() {
           ))}
         </div>
         <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
-          Made with <Heart size={14} className="text-red-500 fill-red-500" /> © 2026 My Blog
+          Made with <Heart size={14} className="text-red-500 fill-red-500" /> © 2026 kioyurt
         </p>
       </div>
     </footer>

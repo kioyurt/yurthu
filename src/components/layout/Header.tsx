@@ -66,7 +66,7 @@ export default function Header() {
                 ✦
               </motion.div>
               <span className="font-bold text-lg gradient-text hidden sm:block">
-                My Blog
+                kioyurt
               </span>
             </Link>
 
