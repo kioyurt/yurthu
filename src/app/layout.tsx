@@ -1,9 +1,9 @@
-// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_SC } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { SettingsProvider } from "@/context/SettingsContext";
 import "@/styles/globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -19,11 +19,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="zh-CN" suppressHydrationWarning>
       <body className={`${inter.variable} ${noto.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <SettingsProvider>
+            <div className="min-h-screen flex flex-col">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>

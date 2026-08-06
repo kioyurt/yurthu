@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --accent: #6366f1;
 }
 
 @theme inline {
@@ -23,4 +24,27 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 主题色工具类：任何组件都能用 */
+.accent-bg   { background-color: var(--accent); }
+.accent-text { color: var(--accent); }
+.accent-border { border-color: var(--accent); }
+
+/* 关闭动画（CSS 层，与 MotionConfig 双保险） */
+.no-animations *,
+.no-animations *::before,
+.no-animations *::after {
+  animation-duration: 0.001s !important;
+  transition-duration: 0.001s !important;
+}
+
+/* 关闭粒子：给你的粒子组件容器加上 data-particles 属性即可 */
+.no-particles [data-particles] {
+  display: none !important;
+}
+
+/* 紧凑模式：缩小全局 rem 基准，所有 Tailwind 间距整体变小 */
+.compact-mode {
+  font-size: 14px;
 }
