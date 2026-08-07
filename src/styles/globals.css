@@ -1,58 +1,98 @@
-/* src/styles/globals.css */
 @import "tailwindcss";
 
+/* ============================================
+   🔧 Tailwind v4: 声明 dark mode 使用 class 策略
+   没有这一行，dark: 前缀完全不工作！
+   ============================================ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================
+   🔧 用 @theme 注册 accent 色阶为 Tailwind 设计令牌
+   这样 bg-accent-500、text-accent-400 等原生可用
+   ============================================ */
+@theme {
+  --color-accent-50: hsl(var(--accent-50));
+  --color-accent-100: hsl(var(--accent-100));
+  --color-accent-200: hsl(var(--accent-200));
+  --color-accent-300: hsl(var(--accent-300));
+  --color-accent-400: hsl(var(--accent-400));
+  --color-accent-500: hsl(var(--accent-500));
+  --color-accent-600: hsl(var(--accent-600));
+  --color-accent-700: hsl(var(--accent-700));
+  --color-accent-800: hsl(var(--accent-800));
+  --color-accent-900: hsl(var(--accent-900));
+  --color-accent-950: hsl(var(--accent-950));
+}
+
+/* ============================================
+   默认 Indigo 色阶 — 会被 JS 动态覆盖
+   ============================================ */
 :root {
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --accent: #f59e0b;
+  --accent-50: 239 84% 97%;
+  --accent-100: 239 91% 94%;
+  --accent-200: 239 95% 86%;
+  --accent-300: 239 96% 77%;
+  --accent-400: 239 96% 66%;
+  --accent-500: 239 84% 55%;
+  --accent-600: 239 84% 48%;
+  --accent-700: 239 78% 39%;
+  --accent-800: 239 73% 31%;
+  --accent-900: 239 68% 24%;
+  --accent-950: 239 60% 14%;
+  --accent-raw: #6366f1;
 }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
-}
-
-body {
-  @apply bg-gray-50 dark:bg-[#0a0a1a] text-gray-900 dark:text-gray-100
-         transition-colors duration-300 font-sans antialiased;
-}
-
-/* 毛玻璃卡片 */
+/* ============================================
+   玻璃态效果
+   ============================================ */
 .glass {
-  @apply bg-white/60 dark:bg-white/5
-         backdrop-blur-2xl
-         border border-white/20 dark:border-white/10
-         rounded-2xl shadow-xl shadow-black/5 dark:shadow-black/20;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 1rem;
+}
+
+.dark .glass {
+  background: rgba(30, 30, 40, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .glass-hover {
-  @apply hover:bg-white/80 dark:hover:bg-white/10
-         hover:shadow-2xl hover:shadow-indigo-500/10
-         hover:-translate-y-1
-         transition-all duration-300 ease-out;
+  transition: all 0.3s ease;
 }
 
-/* 渐变文字 */
+.glass-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.dark .glass-hover:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   渐变文字
+   ============================================ */
 .gradient-text {
-  @apply bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500
-         bg-clip-text text-transparent;
+  background: linear-gradient(135deg, hsl(var(--accent-500)), hsl(var(--accent-400)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* 发光效果 */
-.glow {
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3),
-              0 0 60px rgba(99, 102, 241, 0.1);
-}
+/* ============================================
+   快捷工具类（兼容旧代码中的 accent-text 等）
+   ============================================ */
+.accent-text { color: hsl(var(--accent-500)); }
+.accent-bg { background-color: hsl(var(--accent-500)); }
+.accent-border { border-color: hsl(var(--accent-500)); }
 
-/* 打字机光标 */
-.cursor-blink {
-  animation: blink 1s step-end infinite;
-}
-@keyframes blink {
-  50% { opacity: 0; }
-}
+.dark .accent-text { color: hsl(var(--accent-400)); }
 
-/* 自定义滚动条 */
+/* ============================================
+   滚动条美化
+   ============================================ */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -60,29 +100,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-indigo-400/30 rounded-full;
+  background: hsl(var(--accent-300));
+  border-radius: 3px;
 }
-
-/* 照片墙瀑布流 */
-.masonry {
-  columns: 3;
-  column-gap: 1rem;
-}
-.masonry-item {
-  break-inside: avoid;
-  margin-bottom: 1rem;
-}
-@media (max-width: 768px) {
-  .masonry { columns: 2; }
-}
-@media (max-width: 480px) {
-  .masonry { columns: 1; }
-}
-
-/* 音乐播放器进度条 */
-input[type="range"] {
-  @apply appearance-none h-1 rounded-full bg-gray-200 dark:bg-gray-700;
-}
-input[type="range"]::-webkit-slider-thumb {
-  @apply appearance-none w-3 h-3 rounded-full bg-indigo-500 cursor-pointer;
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(var(--accent-700));
 }

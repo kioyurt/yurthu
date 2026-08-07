@@ -1,50 +1,48 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --accent: #6366f1;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* 🔧 默认 Indigo 色阶 — 会被 JS 动态覆盖 */
+    --accent-50: 239 84% 97%;
+    --accent-100: 239 91% 94%;
+    --accent-200: 239 95% 86%;
+    --accent-300: 239 96% 77%;
+    --accent-400: 239 96% 66%;
+    --accent-500: 239 84% 55%;
+    --accent-600: 239 84% 48%;
+    --accent-700: 239 78% 39%;
+    --accent-800: 239 73% 31%;
+    --accent-900: 239 68% 24%;
+    --accent-950: 239 60% 14%;
+    --accent-raw: #6366f1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+@layer utilities {
+  /* 🔧 动态主题色工具类 — 设置页和所有组件都能用 */
+  .accent-text { color: hsl(var(--accent-500)); }
+  .accent-bg { background-color: hsl(var(--accent-500)); }
+  .accent-border { border-color: hsl(var(--accent-500)); }
+  .accent-ring { --tw-ring-color: hsl(var(--accent-500) / 0.5); }
 
-/* 主题色工具类：任何组件都能用 */
-.accent-bg   { background-color: var(--accent); }
-.accent-text { color: var(--accent); }
-.accent-border { border-color: var(--accent); }
+  .accent-text-400 { color: hsl(var(--accent-400)); }
+  .accent-bg-50 { background-color: hsl(var(--accent-50)); }
+  .accent-bg-100 { background-color: hsl(var(--accent-100)); }
+  .accent-bg-500\/10 { background-color: hsl(var(--accent-500) / 0.1); }
+  .accent-bg-500\/5 { background-color: hsl(var(--accent-500) / 0.05); }
+  .accent-border-300 { border-color: hsl(var(--accent-300)); }
+  .accent-border-400\/50 { border-color: hsl(var(--accent-400) / 0.5); }
 
-/* 关闭动画（CSS 层，与 MotionConfig 双保险） */
-.no-animations *,
-.no-animations *::before,
-.no-animations *::after {
-  animation-duration: 0.001s !important;
-  transition-duration: 0.001s !important;
-}
+  /* hover 变体 */
+  .hover\:accent-text:hover { color: hsl(var(--accent-500)); }
+  .hover\:accent-border:hover { border-color: hsl(var(--accent-400)); }
+  .hover\:accent-bg-50\/50:hover { background-color: hsl(var(--accent-50) / 0.5); }
+  .hover\:accent-bg-500\/5:hover { background-color: hsl(var(--accent-500) / 0.05); }
 
-/* 关闭粒子：给你的粒子组件容器加上 data-particles 属性即可 */
-.no-particles [data-particles] {
-  display: none !important;
-}
-
-/* 紧凑模式：缩小全局 rem 基准，所有 Tailwind 间距整体变小 */
-.compact-mode {
-  font-size: 14px;
+  /* dark 变体 */
+  .dark .accent-text { color: hsl(var(--accent-400)); }
+  .dark .accent-bg-50 { background-color: hsl(var(--accent-500) / 0.1); }
+  .dark .hover\:accent-bg-50\/50:hover { background-color: hsl(var(--accent-500) / 0.05); }
 }

@@ -12,15 +12,15 @@ import {
 } from "lucide-react";
 
 const accentColors = [
-  { name: "Indigo", value: "#6366f1", class: "bg-indigo-500" },
-  { name: "Blue",   value: "#3b82f6", class: "bg-blue-500" },
-  { name: "Green",  value: "#10b981", class: "bg-emerald-500" },
-  { name: "Rose",   value: "#f43f5e", class: "bg-rose-500" },
-  { name: "Amber",  value: "#f59e0b", class: "bg-amber-500" },
-  { name: "Purple", value: "#a855f7", class: "bg-purple-500" },
+  { name: "Indigo", value: "#6366f1" },
+  { name: "Blue",   value: "#3b82f6" },
+  { name: "Green",  value: "#10b981" },
+  { name: "Rose",   value: "#f43f5e" },
+  { name: "Amber",  value: "#f59e0b" },
+  { name: "Purple", value: "#a855f7" },
 ];
 
-// 简易点击音效（开启"音效"后生效）
+// 简易点击音效
 let audioCtx: AudioContext | null = null;
 function playClick() {
   try {
@@ -41,7 +41,7 @@ export default function SettingsPage() {
   const { settings, loaded, updateSettings, resetSettings } = useSettings();
   const [mounted, setMounted] = useState(false);
   const [savedTip, setSavedTip] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => setMounted(true), []);
 
@@ -67,12 +67,15 @@ export default function SettingsPage() {
     { key: "showReadingTime", label: "阅读时间", desc: "在文章卡片上显示预计阅读时间" },
   ];
 
+  // 🔧 当前选中色的 ring 颜色直接用 inline style
+  const currentAccent = settings.accentColor;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-24">
       <SectionTitle title="设置" subtitle="所有修改自动保存，刷新后依然生效" />
 
       <div className="space-y-6">
-        {/* 深浅色主题 */}
+        {/* ===== 深浅色主题 ===== */}
         <GlassCard>
           <h3 className="font-semibold flex items-center gap-2 mb-4">
             <Palette size={18} className="accent-text" /> 主题
@@ -82,49 +85,83 @@ export default function SettingsPage() {
               { value: "light", label: "浅色", icon: Sun },
               { value: "dark", label: "深色", icon: Moon },
               { value: "system", label: "跟随系统", icon: Monitor },
-            ].map((t) => (
-              <button
-                key={t.value}
-                onClick={() => setTheme(t.value)}
-                className={`p-4 rounded-xl border-2 transition-all text-center ${
-                  mounted && theme === t.value
-                    ? "accent-border bg-indigo-50 dark:bg-indigo-500/10"
-                    : "border-gray-200 dark:border-gray-700 hover:border-indigo-300"
-                }`}
-              >
-                <t.icon className="mx-auto mb-2" size={20} />
-                <span className="text-sm">{t.label}</span>
-              </button>
-            ))}
+            ].map((t) => {
+              // 🔧 修复：选中态用动态 accent 色而非写死 indigo
+              const isSelected = mounted && theme === t.value;
+              return (
+                <button
+                  key={t.value}
+                  onClick={() => setTheme(t.value)}
+                  className={`p-4 rounded-xl border-2 transition-all text-center ${
+                    isSelected
+                      ? "border-transparent"
+                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                  }`}
+                  style={isSelected ? {
+                    borderColor: currentAccent,
+                    backgroundColor: `${currentAccent}15`,  // 15 = ~8% opacity hex
+                  } : undefined}
+                >
+                  <t.icon
+                    className="mx-auto mb-2"
+                    size={20}
+                    style={isSelected ? { color: currentAccent } : undefined}
+                  />
+                  <span
+                    className="text-sm"
+                    style={isSelected ? { color: currentAccent, fontWeight: 600 } : undefined}
+                  >
+                    {t.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </GlassCard>
 
-        {/* 主题色 */}
+        {/* ===== 主题色 ===== */}
         <GlassCard>
           <h3 className="font-semibold flex items-center gap-2 mb-4">
             <Sparkles size={18} className="accent-text" /> 主题色
           </h3>
           <div className="flex gap-3 flex-wrap">
-            {accentColors.map((color) => (
-              <button
-                key={color.name}
-                onClick={() => updateSettings({ accentColor: color.value })}
-                className={`w-10 h-10 rounded-full ${color.class} transition-all ${
-                  settings.accentColor === color.value
-                    ? "ring-4 ring-offset-2 ring-indigo-500/30 scale-110"
-                    : "hover:scale-110"
-                }`}
-                title={color.name}
-              />
-            ))}
+            {accentColors.map((color) => {
+              const isSelected = settings.accentColor === color.value;
+              return (
+                <button
+                  key={color.name}
+                  onClick={() => updateSettings({ accentColor: color.value })}
+                  className="w-10 h-10 rounded-full transition-all relative"
+                  style={{
+                    backgroundColor: color.value,
+                    transform: isSelected ? "scale(1.15)" : "scale(1)",
+                    boxShadow: isSelected
+                      ? `0 0 0 3px white, 0 0 0 6px ${color.value}60`
+                      : "none",
+                  }}
+                  title={color.name}
+                >
+                  {isSelected && (
+                    <Check
+                      size={16}
+                      className="absolute inset-0 m-auto text-white"
+                      strokeWidth={3}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
           <p className="mt-3 text-xs text-gray-400">
-            当前：<span className="accent-text font-medium">{settings.accentColor}</span>
-            ，页面上带 <code>accent-*</code> 类的元素会同步变色
+            当前：
+            <span className="font-medium" style={{ color: currentAccent }}>
+              {currentAccent}
+            </span>
+            {" "}· 全站主题色已同步更新
           </p>
         </GlassCard>
 
-        {/* 偏好开关 */}
+        {/* ===== 偏好开关 ===== */}
         <GlassCard>
           <h3 className="font-semibold flex items-center gap-2 mb-4">
             <Bell size={18} className="text-green-500" /> 偏好设置
@@ -140,13 +177,20 @@ export default function SettingsPage() {
                   </div>
                   <button
                     onClick={() => toggle(item.key)}
-                    className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${
-                      on ? "accent-bg" : "bg-gray-200 dark:bg-gray-700"
-                    }`}
+                    className="w-12 h-6 rounded-full transition-colors relative shrink-0"
+                    style={{
+                      backgroundColor: on ? currentAccent : undefined,
+                    }}
+                    data-on={on}
                   >
+                    {/* 用 CSS 控制关闭态颜色 */}
+                    {!on && (
+                      <span className="absolute inset-0 rounded-full bg-gray-200 dark:bg-gray-700" />
+                    )}
                     <motion.div
                       animate={{ x: on ? 24 : 2 }}
-                      className="absolute top-1 w-4 h-4 rounded-full bg-white shadow"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="absolute top-1 w-4 h-4 rounded-full bg-white shadow z-10"
                     />
                   </button>
                 </div>
@@ -155,7 +199,7 @@ export default function SettingsPage() {
           </div>
         </GlassCard>
 
-        {/* 语言 */}
+        {/* ===== 语言 ===== */}
         <GlassCard>
           <h3 className="font-semibold flex items-center gap-2 mb-4">
             <Globe size={18} className="text-blue-500" /> 语言
@@ -163,7 +207,8 @@ export default function SettingsPage() {
           <select
             value={settings.language}
             onChange={(e) => updateSettings({ language: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 transition-shadow"
+            style={{ "--tw-ring-color": `${currentAccent}80` } as React.CSSProperties}
           >
             <option value="zh-CN">简体中文</option>
             <option value="en">English</option>
@@ -171,20 +216,25 @@ export default function SettingsPage() {
           </select>
         </GlassCard>
 
-        {/* 底部操作区 */}
+        {/* ===== 底部操作区 ===== */}
         <div className="flex items-center gap-3">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={resetSettings}
-            className="flex-1 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+            className="flex-1 py-4 text-white rounded-xl font-medium shadow-lg flex items-center justify-center gap-2"
+            style={{
+              background: `linear-gradient(135deg, ${currentAccent}, ${currentAccent}cc)`,
+              boxShadow: `0 8px 24px ${currentAccent}30`,
+            }}
           >
             <RotateCcw size={18} /> 恢复默认设置
           </motion.button>
           <span
-            className={`flex items-center gap-1 text-sm text-green-500 transition-opacity ${
+            className={`flex items-center gap-1 text-sm transition-opacity ${
               savedTip ? "opacity-100" : "opacity-0"
             }`}
+            style={{ color: "#10b981" }}
           >
             <Check size={16} /> 已自动保存
           </span>

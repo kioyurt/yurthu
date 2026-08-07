@@ -1,6 +1,7 @@
 // src/components/ui/SectionTitle.tsx
 "use client";
 import { motion } from "framer-motion";
+import {useT} from "@/hooks/useT";
 
 export default function SectionTitle({
   title,
@@ -9,6 +10,9 @@ export default function SectionTitle({
   title: string;
   subtitle?: string;
 }) {
+
+  const { tr } = useT();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -17,10 +21,10 @@ export default function SectionTitle({
       className="mb-12 text-center"
     >
       <h2 className="text-3xl md:text-4xl font-bold mb-3">
-        <span className="gradient-text">{title}</span>
+        <span className="gradient-text">{tr(title)}</span>  
       </h2>
       {subtitle && (
-        <p className="text-gray-500 dark:text-gray-400">{subtitle}</p>
+        <p className="text-gray-500 dark:text-gray-400">{tr(subtitle)}</p> 
       )}
       <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mx-auto mt-4" />
     </motion.div>
