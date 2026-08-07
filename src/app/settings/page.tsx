@@ -41,7 +41,7 @@ export default function SettingsPage() {
   const { settings, loaded, updateSettings, resetSettings } = useSettings();
   const [mounted, setMounted] = useState(false);
   const [savedTip, setSavedTip] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => setMounted(true), []);
 

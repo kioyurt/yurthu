@@ -44,7 +44,7 @@ export default function MusicPage() {
   const [showLyrics, setShowLyrics] = useState(true);
   // 🔧 修复1: 用 ref 追踪用户是否正在手动滚动，避免自动滚动打断用户操作
   const isUserScrolling = useRef(false);
-  const scrollTimer = useRef<ReturnType<typeof setTimeout>>();
+  const scrollTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const current = allSongs[index] || null;
 
