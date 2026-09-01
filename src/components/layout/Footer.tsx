@@ -1,7 +1,11 @@
+"use client";
+
 import { Heart, Mail } from "lucide-react";
 import { GithubIcon, TwitterIcon } from "@/components/ui/BrandIcons";
+import { useT } from "@/hooks/useT";
 
 export default function Footer() {
+  const { tr } = useT();
   return (
     <footer className="border-t border-gray-200/50 dark:border-gray-800/50 py-8">
       <div className="max-w-7xl mx-auto px-4 text-center space-y-4">
@@ -17,7 +21,7 @@ export default function Footer() {
           ))}
         </div>
         <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
-          Made with <Heart size={14} className="text-red-500 fill-red-500" /> © 2026 kioyurt
+          {tr("用心制作")} <Heart size={14} className="text-red-500 fill-red-500" /> © 2026 kioyurt
         </p>
       </div>
     </footer>

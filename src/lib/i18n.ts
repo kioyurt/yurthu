@@ -151,6 +151,19 @@ const dict: Record<string, Partial<Record<Exclude<Locale, "zh-CN">, string>>> = 
   "运维": { en: "Operations", ja: "運用" },
   "Rust": { en: "Rust", ja: "Rust" },
   "© 2026 KIOYURT": { en: "© 2026 KIOYURT", ja: "© 2026 KIOYURT" },
+  "© 2026 kioyurt · 用 Next.js 与 ❤️ 构建": {
+    en: "© 2026 kioyurt · Built with Next.js & ❤️",
+    ja: "© 2026 kioyurt · Next.js と ❤️ で構築",
+  },
+  "用心制作": { en: "Made with", ja: "心を込めて" },
+  "词": { en: "Lyrics", ja: "詞" },
+  "游戏": { en: "Games", ja: "ゲーム" },
+  "切换主题": { en: "Toggle theme", ja: "テーマ切替" },
+  "打开菜单": { en: "Open menu", ja: "メニューを開く" },
+  "article": { en: "Article", ja: "記事" },
+  "music": { en: "Music", ja: "音楽" },
+  "photo": { en: "Photo", ja: "写真" },
+  "project": { en: "Project", ja: "プロジェクト" },
 
   // ===== 通用 =====
   "纯音乐，请欣赏": {
@@ -198,20 +211,20 @@ const dict: Record<string, Partial<Record<Exclude<Locale, "zh-CN">, string>>> = 
   "添加友链":   { en: "Request a link", ja: "リンクを申請" },
   "查看详情":   { en: "View details", ja: "詳細を見る" },
   "页面走丢了": { en: "Page not found", ja: "ページが見つかりません" },
-  
+
   // ===== 兴趣爱好 =====
   "编程": { en: "Programming", ja: "プログラミング" },
   "咖啡": { en: "Coffee", ja: "コーヒー" },
   "阅读": { en: "Reading", ja: "読書" },
   "设计": { en: "Design", ja: "デザイン" },
-  
+
   // ===== 项目页 =====
   "仓库": { en: "Repos", ja: "リポジトリ" },
   "关注者": { en: "Followers", ja: "フォロワー" },
-  
+
   // ===== 文章页 =====
   "记录技术探索与生活感悟": { en: "Sharing tech exploration and life insights", ja: "技術探求と生活洞察を共有" },
-  
+
   // ===== 项目页 =====
   "GitHub 数据暂时无法加载（网络或 API 限流），请稍后刷新。": {
     en: "Failed to load GitHub data (network or API rate limit). Please refresh later.",
@@ -231,7 +244,7 @@ const dict: Record<string, Partial<Record<Exclude<Locale, "zh-CN">, string>>> = 
   "数据来自 GitHub，每小时自动更新": { en: "Data from GitHub, auto-updated every hour", ja: "GitHub のデータ、1時間ごとに自動更新" },
   "探索": { en: "Explore", ja: "探索" },
   "AI 助手": { en: "AI Assistant", ja: "AI アシスタント" },
-  
+
   // ===== 空间页 =====
   "数字空间": { en: "Digital Space", ja: "デジタルスペース" },
   "我的设备、服务与数字生活": { en: "My devices, services & digital life", ja: "私のデバイス、サービス、デジタル生活" },
@@ -255,11 +268,10 @@ const dict: Record<string, Partial<Record<Exclude<Locale, "zh-CN">, string>>> = 
   "AI 工作站加入": { en: "AI workstation added", ja: "AI ワークステーション追加" },
   "全自动化运维": { en: "Full automation ops", ja: "完全自動化運用" },
   "边缘计算节点": { en: "Edge computing nodes", ja: "エッジコンピューティングノード" },
-  
-  // ===== 文章页 =====
+
+  // ===== 文章页（列表数据） =====
   "全部": { en: "All", ja: "すべて" },
   "后端": { en: "Backend", ja: "バックエンド" },
-  "AI": { en: "AI", ja: "AI" },
   "生活": { en: "Life", ja: "ライフ" },
   "摄影": { en: "Photography", ja: "写真" },
   "开源": { en: "Open source", ja: "オープンソース" },
@@ -281,25 +293,73 @@ const dict: Record<string, Partial<Record<Exclude<Locale, "zh-CN">, string>>> = 
   "开源一年：我的 GitHub 成长记录": { en: "One Year of Open Source: My GitHub Growth Story", ja: "オープンソース1年：私のGitHub成長記録" },
   "从第一个 PR 到维护 3 个千星项目的心路历程...": { en: "From the first PR to maintaining 3 thousand-star projects...", ja: "最初の PR から 3 つの千星プロジェクトの保守まで..."
  },
-  
+  "没有找到相关文章": { en: "No articles found", ja: "記事が見つかりません" },
+  "创作": { en: "Creation", ja: "創作" },
+  "旅行": { en: "Travel", ja: "旅行" },
+  "日本": { en: "Japan", ja: "日本" },
+  "风光": { en: "Landscape", ja: "風景" },
+  "成长": { en: "Growth", ja: "成長" },
+  "趋势": { en: "Trends", ja: "トレンド" },
+
+  // ===== 文章详情页 =====
+  "返回文章列表": { en: "Back to articles", ja: "記事一覧に戻る" },
+  "点赞": { en: "Like", ja: "いいね" },
+  "已点赞": { en: "Liked", ja: "いいね済み" },
+  "8 分钟": { en: "8 min", ja: "8 分" },
+  "\n## 引言\n\n2026年的前端开发正在经历一场深刻的变革。AI不再只是一个辅助工具，而是深度融入了开发的每一个环节。\n\n## AI 驱动的代码生成\n\n现代 IDE 已经内置了强大的 AI 助手，它们能够：\n\n- **理解上下文**：分析整个项目结构\n- **生成组件**：根据描述自动创建 React 组件\n- **自动重构**：识别性能瓶颈并给出优化建议\n- **编写测试**：自动生成单元测试和 E2E 测试\n\n## React Server Components 成为主流\n\n```tsx\n// Server Component - 直接在服务端获取数据\nasync function ArticleList() {\n  const articles = await db.query('SELECT * FROM articles');\n  return (\n    <ul>\n      {articles.map(a => <li key={a.id}>{a.title}</li>)}\n    </ul>\n  );\n}\n```\n\n## 边缘计算与全栈融合\n\n| 技术 | 用途 | 成熟度 |\n|------|------|--------|\n| Edge Functions | 低延迟 API | ⭐⭐⭐⭐⭐ |\n| WebAssembly | 高性能计算 | ⭐⭐⭐⭐ |\n| AI Inference | 端侧推理 | ⭐⭐⭐ |\n\n## 总结\n\n前端开发正在从「写界面」进化为「编排体验」。掌握 AI 工具、理解全栈架构、关注性能优化，将是 2026 年前端开发者的核心竞争力。\n\n> \"The best way to predict the future is to invent it.\" — Alan Kay\n": {
+    en: "\n## Introduction\n\nFrontend development in 2026 is undergoing a profound transformation. AI is no longer just an auxiliary tool — it has deeply integrated into every step of development.\n\n## AI-Driven Code Generation\n\nModern IDEs come with powerful built-in AI assistants that can:\n\n- **Understand context**: analyze the entire project structure\n- **Generate components**: automatically create React components from descriptions\n- **Refactor automatically**: identify performance bottlenecks and suggest optimizations\n- **Write tests**: automatically generate unit tests and E2E tests\n\n## React Server Components Go Mainstream\n\n```tsx\n// Server Component - fetch data directly on the server\nasync function ArticleList() {\n  const articles = await db.query('SELECT * FROM articles');\n  return (\n    <ul>\n      {articles.map(a => <li key={a.id}>{a.title}</li>)}\n    </ul>\n  );\n}\n```\n\n## Edge Computing and Full-Stack Convergence\n\n| Technology | Use case | Maturity |\n|------|------|--------|\n| Edge Functions | Low-latency APIs | ⭐⭐⭐⭐⭐ |\n| WebAssembly | High-performance computing | ⭐⭐⭐⭐ |\n| AI Inference | On-device inference | ⭐⭐⭐ |\n\n## Conclusion\n\nFrontend development is evolving from \"writing interfaces\" to \"orchestrating experiences\". Mastering AI tools, understanding full-stack architecture, and focusing on performance optimization will be the core competencies of frontend developers in 2026.\n\n> \"The best way to predict the future is to invent it.\" — Alan Kay\n",
+    ja: "\n## はじめに\n\n2026年のフロントエンド開発は大きな変革を迎えています。AIはもはや補助ツールにとどまらず、開発のあらゆる工程に深く溶け込んでいます。\n\n## AI駆動のコード生成\n\n最新のIDEには強力なAIアシスタントが組み込まれており、次のことが可能です：\n\n- **コンテキストの理解**：プロジェクト全体を分析\n- **コンポーネント生成**：説明からReactコンポーネントを自動作成\n- **自動リファクタリング**：パフォーマンスのボトルネックを特定し最適化を提案\n- **テスト作成**：ユニットテストとE2Eテストを自動生成\n\n## React Server Componentsが主流に\n\n```tsx\n// Server Component - サーバー側で直接データを取得\nasync function ArticleList() {\n  const articles = await db.query('SELECT * FROM articles');\n  return (\n    <ul>\n      {articles.map(a => <li key={a.id}>{a.title}</li>)}\n    </ul>\n  );\n}\n```\n\n## エッジコンピューティングとフルスタック融合\n\n| 技術 | 用途 | 成熟度 |\n|------|------|--------|\n| Edge Functions | 低遅延API | ⭐⭐⭐⭐⭐ |\n| WebAssembly | 高性能計算 | ⭐⭐⭐⭐ |\n| AI Inference | デバイス側推論 | ⭐⭐⭐ |\n\n## まとめ\n\nフロントエンド開発は「画面を書く」ことから「体験をオーケストレーションする」ことへと進化しています。AIツールの習得、フルスタックアーキテクチャの理解、パフォーマンス最適化への注目が、2026年のフロントエンド開発者の競争力となるでしょう。\n\n> \"The best way to predict the future is to invent it.\" — Alan Kay\n",
+  },
+
   // ===== 留言页 =====
   "用户昵称": { en: "Username", ja: "ユーザー名" },
-  "回复": { en: "Reply", ja: "返信" },
-  
+  "博主": { en: "Author", ja: "ブログ主" },
+  "博客做得好漂亮！UI 设计太棒了 ✨": {
+    en: "The blog looks amazing! The UI design is fantastic ✨",
+    ja: "ブログがすごく素敵！UIデザインが最高 ✨",
+  },
+  "谢谢！花了很久调的哈哈": {
+    en: "Thanks! I spent a long time tweaking it, haha",
+    ja: "ありがとうございます！時間をかけて調整しました（笑）",
+  },
+  "请问这个博客用什么技术栈搭建的？想学习一下": {
+    en: "What tech stack is this blog built with? I'd love to learn",
+    ja: "このブログは何の技術スタックで構築されていますか？学びたいです",
+  },
+  "从友链过来的，文章质量很高，已收藏！": {
+    en: "Came via a friend link — great articles, bookmarked!",
+    ja: "友達リンクから来ました。記事の質が高く、ブックマークしました！",
+  },
+
   // ===== 友链页 =====
+  "小明的博客": { en: "Xiao Ming's Blog", ja: "シャオミンのブログ" },
+  "设计小站": { en: "Design Station", ja: "デザインステーション" },
+  "游戏开发日志": { en: "Game Dev Journal", ja: "ゲーム開発日誌" },
+  "运维老张": { en: "Ops Veteran Zhang", ja: "運用の張さん" },
   "前端开发 / 摄影爱好者": { en: "Frontend developer / photography enthusiast", ja: "フロントエンド開発者 / 写真愛好家" },
   "后端架构 / 分布式系统": { en: "Backend architect / distributed systems", ja: "バックエンドアーキテクト / 分散システム" },
   "UI/UX 设计 / 插画创作": { en: "UI/UX designer / illustration creator", ja: "UI/UXデザイナー / イラストレーター" },
   "机器学习 / NLP / 论文解读": { en: "Machine learning / NLP / paper interpretation", ja: "機械学習 / NLP / 論文解釈" },
   "独立游戏开发 / Unity / Godot": { en: "Indie game developer / Unity / Godot", ja: "インディーゲーム開発者 / Unity / Godot" },
   "DevOps / K8s / 云原生": { en: "DevOps / K8s / cloud native", ja: "DevOps / K8s / クラウドネイティブ" },
-  
+  "架构": { en: "Architecture", ja: "アーキテクチャ" },
+  "插画": { en: "Illustration", ja: "イラスト" },
+
   // ===== 照片页 =====
-  "照片墙": { en: "Photo Gallery", ja: "フォトギャラリー" },
   "用镜头记录生活的每一个瞬间 📸": { en: "Recording every moment of life with the camera 📸", ja: "カメラで人生の瞬間を記録する 📸" },
   "张照片": { en: "photos", ja: "枚の写真" },
   "这个相册还没有照片": { en: "No photos in this album yet", ja: "このアルバムにはまだ写真がありません" },
-  
+  "旅行日记": { en: "Travel Diary", ja: "旅行日記" },
+  "城市光影": { en: "City Lights", ja: "都市の光と影" },
+  "美食日常": { en: "Daily Food", ja: "グルメ日常" },
+  "未命名": { en: "Untitled", ja: "無題" },
+  "大理的清晨": { en: "A morning in Dali", ja: "大理の朝" },
+  "午后的石板路": { en: "Cobblestone streets in the afternoon", ja: "午後の石畳の道" },
+  "琉森湖畔": { en: "By Lake Lucerne", ja: "ルツェルン湖畔" },
+  "黄昏的巴黎": { en: "Paris at dusk", ja: "黄昏のパリ" },
+  "加班后的街": { en: "Streets after overtime", ja: "残業後の街" },
+  "一碗治愈": { en: "A healing bowl", ja: "一杯の癒し" },
+
   // ===== 归档页 =====
   "共 {count} 篇文章，记录成长的每一步": { en: "{count} articles total, recording every step of growth", ja: "全 {count} 記事、成長の各ステップを記録" },
   "篇": { en: "articles", ja: "記事" },
@@ -324,7 +384,11 @@ const dict: Record<string, Partial<Record<Exclude<Locale, "zh-CN">, string>>> = 
   "年度最佳工具推荐": { en: "Best Tools of the Year", ja: "年間最高ツール推奨" },
   "从零学习 Kubernetes": { en: "Learning Kubernetes from Scratch", ja: "ゼロから学ぶ Kubernetes" },
   "TypeScript 高级类型体操": { en: "Advanced TypeScript Type Gymnastics", ja: "TypeScript 高度な型体操" },
-  
+  "读书": { en: "Books", ja: "読書" },
+  "数据库": { en: "Database", ja: "データベース" },
+  "总结": { en: "Summary", ja: "まとめ" },
+  "工具": { en: "Tools", ja: "ツール" },
+
   // ===== 音乐页 =====
   "音乐库": { en: "Music Library", ja: "音楽ライブラリ" },
   "纯音乐精选": { en: "Instrumental Selections", ja: "楽器精選" },
@@ -334,12 +398,41 @@ const dict: Record<string, Partial<Record<Exclude<Locale, "zh-CN">, string>>> = 
   "播放速度": { en: "Playback speed", ja: "再生速度" },
   "音量": { en: "Volume", ja: "ボリューム" },
   "歌词": { en: "Lyrics", ja: "歌詞" },
-  
+  "代码与旋律，都是生活的节拍 🎶": {
+    en: "Code and melody — both are the rhythm of life 🎶",
+    ja: "コードと旋律、どちらも人生のビート 🎶",
+  },
+  "随机播放": { en: "Shuffle", ja: "シャッフル" },
+  "上一首": { en: "Previous", ja: "前の曲" },
+  "下一首": { en: "Next", ja: "次の曲" },
+  "单曲循环": { en: "Repeat one", ja: "1曲リピート" },
+  "收起歌词": { en: "Hide lyrics", ja: "歌詞を隠す" },
+  "展开歌词": { en: "Show lyrics", ja: "歌詞を表示" },
+  "{count} 行": { en: "{count} lines", ja: "{count} 行" },
+  "用心感受旋律就好": { en: "Just feel the melody with your heart", ja: "ただ心でメロディを感じて" },
+  "全部歌曲": { en: "All tracks", ja: "全曲" },
+  "{count} 首歌 · 点击播放": { en: "{count} tracks · click to play", ja: "{count} 曲 · クリックで再生" },
+  "未分类": { en: "Uncategorized", ja: "未分類" },
+  "⚠️ 音频加载失败": { en: "⚠️ Failed to load audio", ja: "⚠️ 音声の読み込みに失敗" },
+  "AI 原创": { en: "AI Originals", ja: "AI オリジナル" },
+
   // ===== 视频页 =====
   "视频库": { en: "Video Library", ja: "ビデオライブラリ" },
   "技术分享": { en: "Tech Sharing", ja: "技術シェアリング" },
   "Vlog": { en: "Vlog", ja: "Vlog" },
   "教程": { en: "Tutorial", ja: "チュートリアル" },
+  "用影像记录技术与生活 🎬": {
+    en: "Recording tech and life through video 🎬",
+    ja: "映像で技術と生活を記録 🎬",
+  },
+  "视频播放器区域": { en: "Video player area", ja: "動画プレーヤー領域" },
+  "（集成 ReactPlayer / YouTube / Bilibili 嵌入）": {
+    en: "(ReactPlayer / YouTube / Bilibili embed integration)",
+    ja: "（ReactPlayer / YouTube / Bilibili 埋め込み統合）",
+  },
+  "{count} 次观看": { en: "{count} views", ja: "{count} 回視聴" },
+  "抖音": { en: "Douyin", ja: "Douyin" },
+  "B站": { en: "Bilibili", ja: "Bilibili" },
   "用 Next.js 16 搭建博客全流程": { en: "Building a Blog with Next.js 16 - Complete Guide", ja: "Next.js 16 でブログを構築 - 完全ガイド" },
   "我的 HomeLab 之旅 | 2026 Edition": { en: "My HomeLab Journey | 2026 Edition", ja: "私の HomeLab 旅行 | 2026 版" },
   "React Server Components 深度解析": { en: "React Server Components - Deep Dive", ja: "React Server Components - 詳細解析" },
@@ -352,6 +445,101 @@ const dict: Record<string, Partial<Record<Exclude<Locale, "zh-CN">, string>>> = 
   "2:00:00": { en: "2:00:00", ja: "2:00:00" },
   "42:00": { en: "42:00", ja: "42:00" },
   "12:30": { en: "12:30", ja: "12:30" },
+
+  // ===== 首页：问候语与副标题 =====
+  "你好 👋": { en: "Hello 👋", ja: "こんにちは 👋" },
+  "早安，早起的人 🌅": { en: "Good morning, early bird 🌅", ja: "おはよう、早起きさん 🌅" },
+  "新的一天，从代码开始": { en: "A new day starts with code", ja: "新しい一日はコードから" },
+  "早上好 ☀️": { en: "Good morning ☀️", ja: "おはようございます ☀️" },
+  "精力充沛，适合写点东西": { en: "Full of energy — a good time to write something", ja: "エネルギー満タン、何か書くのに最適" },
+  "下午好 🌤️": { en: "Good afternoon 🌤️", ja: "こんにちは 🌤️" },
+  "来杯咖啡，看看最近的技术动态": { en: "Grab a coffee and catch up on the latest tech", ja: "コーヒーを片手に最新技術トレンドを" },
+  "晚上好 🌆": { en: "Good evening 🌆", ja: "こんばんは 🌆" },
+  "忙碌一天，来点轻松的内容": { en: "After a busy day, enjoy something relaxing", ja: "忙しい一日の後はリラックスできるコンテンツを" },
+  "夜猫子模式已开启 🦉": { en: "Night owl mode activated 🦉", ja: "夜更かしモード起動 🦉" },
+  "深夜写代码，灵感最旺盛的时候": { en: "Late-night coding — peak inspiration time", ja: "深夜のコーディング、インスピレーションが最も湧く時間" },
+
+  // ===== 首页：来源欢迎语 =====
+  "欢迎 fellow developer 🐙 从 GitHub 过来的你一定很酷": {
+    en: "Welcome, fellow developer 🐙 You must be cool coming from GitHub",
+    ja: "ようこそ、開発者仲間 🐙 GitHub から来たあなたはきっとクール",
+  },
+  "嘿，Twitter 的朋友 👋 感谢关注": {
+    en: "Hey, friend from Twitter 👋 Thanks for following",
+    ja: "やあ、Twitter の友達 👋 フォローありがとう",
+  },
+  "搜索达人，欢迎找到这里 🔍": { en: "Search master, welcome 🔍", ja: "検索の達人、ようこそ 🔍" },
+  "老朋友，欢迎回来 ✨": { en: "Welcome back, old friend ✨", ja: "古い友達、おかえりなさい ✨" },
+  "欢迎新朋友 🎉": { en: "Welcome, new friend 🎉", ja: "新しい友達、ようこそ 🎉" },
+
+  // ===== 首页：CTA =====
+  "作品集": { en: "Portfolio", ja: "作品集" },
+  "给我发条消息": { en: "Send me a message", ja: "メッセージを送る" },
+  "订阅更新": { en: "Subscribe", ja: "購読する" },
+  "留言墙": { en: "Message Wall", ja: "メッセージウォール" },
+  "订阅成功！": { en: "Subscribed!", ja: "購読成功！" },
+  "新文章发布时会通知你": {
+    en: "You'll be notified when new articles are published",
+    ja: "新記事が公開されたら通知します",
+  },
+  "📬 订阅更新": { en: "📬 Subscribe to updates", ja: "📬 更新を購読" },
+  "每月最多 2 封邮件，绝不打扰": {
+    en: "At most 2 emails per month, never spamming",
+    ja: "月最大2通、迷惑メールは送りません",
+  },
+  "订阅": { en: "Subscribe", ja: "購読する" },
+
+  // ===== 首页：统计 / 热力图 =====
+  "本周": { en: "this week", ja: "今週" },
+  "活跃度": { en: "Activity", ja: "活動度" },
+  "过去 16 周": { en: "Past 16 weeks", ja: "過去 16 週間" },
+  "次贡献": { en: "contributions", ja: "回の貢献" },
+  "少": { en: "Less", ja: "少" },
+  "多": { en: "More", ja: "多" },
+  "次": { en: "times", ja: "回" },
+
+  // ===== 首页：最近动态 =====
+  "最近动态": { en: "Recent activity", ja: "最近の動向" },
+  "blog-engine v2.3.0 发布": { en: "blog-engine v2.3.0 released", ja: "blog-engine v2.3.0 リリース" },
+  "周末骑行 · 城市夜景": { en: "Weekend ride · City night view", ja: "週末サイクリング · 都市の夜景" },
+  "新增 3 首歌曲到「深夜编程」歌单": {
+    en: "Added 3 tracks to the \"Late-night Coding\" playlist",
+    ja: "「深夜プログラミング」プレイリストに3曲追加",
+  },
+
+  // ===== 首页：更新日志 =====
+  "最近更新": { en: "Recent updates", ja: "最近の更新" },
+  "新增全局搜索 (⌘K)": { en: "Added global search (⌘K)", ja: "グローバル検索を追加 (⌘K)" },
+  "首页动态问候语": { en: "Dynamic homepage greeting", ja: "ホームページの動的あいさつ" },
+  "活跃度热力图": { en: "Activity heatmap", ja: "アクティビティヒートマップ" },
+  "音乐播放器歌词滚动优化": { en: "Music player lyric scrolling optimization", ja: "音楽プレーヤーの歌詞スクロール最適化" },
+  "修复暗色模式闪烁": { en: "Fixed dark mode flicker", ja: "ダークモードのちらつきを修正" },
+  "博客引擎迁移至 Rust": { en: "Blog engine migrated to Rust", ja: "ブログエンジンを Rust に移行" },
+  "性能提升 340%": { en: "340% performance boost", ja: "パフォーマンス 340% 向上" },
+  "查看完整更新日志": { en: "View full changelog", ja: "完全な変更履歴を見る" },
+
+  // ===== 首页：全局搜索 =====
+  "搜索文章、音乐、项目...": { en: "Search articles, music, projects...", ja: "記事、音楽、プロジェクトを検索..." },
+  "搜索...": { en: "Search...", ja: "検索..." },
+  "没有找到相关内容": { en: "No results found", ja: "関連する内容が見つかりません" },
+  "输入关键词搜索，或按": { en: "Type keywords to search, or press", ja: "キーワードを入力して検索、または" },
+  "关闭": { en: "to close", ja: "で閉じる" },
+  "深夜编程歌单": { en: "Late-night Coding Playlist", ja: "「深夜プログラミング」プレイリスト" },
+
+  // ===== 关于页：经历 =====
+  "AI 研究者 / 在读学生": { en: "AI Researcher & Student", ja: "AI研究者・学生" },
+  "人工智能学士": { en: "B.S. in Artificial Intelligence", ja: "人工知能学士" },
+  "信息工程学院": { en: "School of Information Engineering", ja: "情報工程学院" },
+  "量化开发工程师": { en: "Quantitative Developer", ja: "クオンツ開発エンジニア" },
+  "某互联网公司 · 基础架构组": { en: "An internet company · Infrastructure team", ja: "インターネット企業 · インフラチーム" },
+  "全栈开发工程师": { en: "Full-stack Developer", ja: "フルスタック開発エンジニア" },
+  "某创业公司 · 核心开发": { en: "A startup · Core development", ja: "スタートアップ · コア開発" },
+  "独立开发者 / 自由职业": { en: "Indie developer / Freelancer", ja: "個人開発者 / フリーランス" },
+  "做自己的产品，写自己的代码": {
+    en: "Building my own products, writing my own code",
+    ja: "自分のプロダクトを作り、自分のコードを書く",
+  },
+  "2022 - 至今": { en: "2022 - Present", ja: "2022 - 現在" },
 };
 
 /**

@@ -29,7 +29,7 @@ const hobbies = [
 ];
 
 const timeline = [
-  { period: "2022 - 2026", title: "人工智能学士", desc: " 信息工程学院" },
+  { period: "2022 - 2026", title: "人工智能学士", desc: "信息工程学院" },
   { period: "2025 - 2026", title: "量化开发工程师", desc: "某互联网公司 · 基础架构组" },
   { period: "2025 - 2026", title: "全栈开发工程师", desc: "某创业公司 · 核心开发" },
   { period: "2022 - 至今", title: "独立开发者 / 自由职业", desc: "做自己的产品，写自己的代码" },
@@ -53,7 +53,7 @@ export default function AboutPage() {
           👨‍💻
         </motion.div>
         <h2 className="text-2xl font-bold mb-1">kioyurt</h2>
-        <p className="text-indigo-500 font-medium mb-3">AI Researcher and a student</p>
+        <p className="text-indigo-500 font-medium mb-3">{tr("AI 研究者 / 在读学生")}</p>
         <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
           {tr("热爱技术，喜欢用代码创造美好的事物。相信开源的力量，享受学习和分享的过程。白天写代码，晚上看星星。✨")}
         </p>
@@ -131,9 +131,9 @@ export default function AboutPage() {
             className="relative mb-8 pl-6"
           >
             <div className="absolute -left-1 top-1.5 w-3 h-3 rounded-full bg-indigo-500 border-2 border-white dark:border-gray-900" />
-            <span className="text-xs text-indigo-500 font-mono">{item.period}</span>
-            <h4 className="font-semibold mt-1">{item.title}</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</p>
+            <span className="text-xs text-indigo-500 font-mono">{tr(item.period)}</span>
+            <h4 className="font-semibold mt-1">{tr(item.title)}</h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{tr(item.desc)}</p>
           </motion.div>
         ))}
       </div>

@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 export interface Settings {
   animations: boolean;
@@ -98,65 +106,102 @@ function applyAccentColor(hex: string) {
   root.style.setProperty("--accent-s", `${s}%`);
 }
 
+/* ============================================================
+   🔧 localStorage 订阅源
+   用 useSyncExternalStore 同步读取，替代"effect 里 setState"：
+   - 水合（hydration）阶段使用 server 快照，与服务端 HTML 一致
+   - 挂载后自动切换到持久化值，无闪烁、无竞态
+   ============================================================ */
+const listeners = new Set<() => void>();
+
+function emitChange() {
+  for (const cb of listeners) cb();
+}
+
+function storageSubscribe(callback: () => void) {
+  listeners.add(callback);
+  // 跨标签页同步
+  window.addEventListener("storage", callback);
+  return () => {
+    listeners.delete(callback);
+    window.removeEventListener("storage", callback);
+  };
+}
+
+function storageSnapshot(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function storageServerSnapshot(): string | null {
+  return null;
+}
+
+function subscribeNoop() {
+  return () => {};
+}
+
+/** 直接从 localStorage 读取最新设置（供更新时合并用，避免闭包过期） */
+function readStoredSettings(): Settings {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return { ...defaults, ...JSON.parse(raw) };
+  } catch {}
+  return defaults;
+}
+
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<Settings>(defaults);
-  const [loaded, setLoaded] = useState(false);
+  // 是否已挂载到客户端（水合期间为 false，保证首屏与服务端一致）
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
+  // 持久化的原始 JSON（跨标签页、本标签页写入均会实时更新）
+  const raw = useSyncExternalStore(
+    storageSubscribe,
+    storageSnapshot,
+    storageServerSnapshot,
+  );
 
-  // 从 localStorage 恢复
-  useEffect(() => {
+  const settings = useMemo<Settings>(() => {
+    if (!raw) return defaults;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setSettings({ ...defaults, ...parsed });
-      }
-    } catch {}
-    setLoaded(true);
-  }, []);
+      return { ...defaults, ...JSON.parse(raw) };
+    } catch {
+      return defaults;
+    }
+  }, [raw]);
 
-  // 🔧 关键修复：settings 变化时 → 写入 CSS 变量 + 持久化
+  // 🔧 设置变化时：写入主题色 CSS 变量 + 同步语言标记
+  // （持久化已由 useSyncExternalStore 数据源负责，此处只做 DOM 副作用）
   useEffect(() => {
-    if (!loaded) return;
-
-    // 1. 写入主题色 CSS 变量
+    if (!mounted) return;
     applyAccentColor(settings.accentColor);
-
-    // 2. 持久化到 localStorage
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    } catch {}
-  }, [settings, loaded]);
-
-  // 🔧 首次加载也要应用一次（防止刷新后 CSS 变量丢失）
-  useEffect(() => {
-    if (loaded) {
-      applyAccentColor(settings.accentColor);
-    }
-  }, [loaded]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ✅ 新增：语言变化时同步 <html lang> 属性
-  useEffect(() => {
-    if (loaded) {
-      document.documentElement.lang = settings.language;
-      document.documentElement.classList.add("notranslate");
-      document.documentElement.setAttribute("translate", "no");
-      document.body?.setAttribute("translate", "no");
-    }
-  }, [settings.language, loaded]);
+    document.documentElement.lang = settings.language;
+    document.documentElement.classList.add("notranslate");
+    document.documentElement.setAttribute("translate", "no");
+    document.body?.setAttribute("translate", "no");
+  }, [settings, mounted]);
 
   const updateSettings = useCallback((partial: Partial<Settings>) => {
-    setSettings((prev) => ({ ...prev, ...partial }));
+    const next = { ...readStoredSettings(), ...partial };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {}
+    emitChange();
   }, []);
 
   const resetSettings = useCallback(() => {
-    setSettings(defaults);
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {}
+    emitChange();
   }, []);
 
   return (
-    <SettingsContext.Provider value={{ settings, loaded, updateSettings, resetSettings }}>
+    <SettingsContext.Provider
+      value={{ settings, loaded: mounted, updateSettings, resetSettings }}
+    >
       {children}
     </SettingsContext.Provider>
   );

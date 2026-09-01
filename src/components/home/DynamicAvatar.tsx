@@ -2,11 +2,7 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import type { TimePeriod } from "@/hooks/useVisitorContext";
-
-// Lottie 动态加载
-const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 interface Props {
   timePeriod: TimePeriod;

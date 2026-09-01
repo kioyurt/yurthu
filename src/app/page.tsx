@@ -13,7 +13,7 @@ import { useVisitorContext } from "@/hooks/useVisitorContext";
 import { useRealTimeStats } from "@/hooks/useRealTimeStats";
 import { useT } from "@/hooks/useT";
 import Link from "next/link";
-import { FileText, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function HomePage() {
   const { tr } = useT();
@@ -167,7 +167,7 @@ export default function HomePage() {
       {/* ===== Footer 社交链接 ===== */}
       <footer className="border-t border-gray-100 dark:border-gray-800 py-8">
         <div className="max-w-4xl mx-auto px-4 text-center text-sm text-gray-400">
-          <p>© 2026 kioyurt · Built with Next.js & ❤️</p>
+          <p>{tr("© 2026 kioyurt · 用 Next.js 与 ❤️ 构建")}</p>
         </div>
       </footer>
     </div>

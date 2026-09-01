@@ -1,6 +1,6 @@
 // src/components/home/GlobalSearch.tsx
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, FileText, Music, Camera, FolderOpen } from "lucide-react";
 import { useT } from "@/hooks/useT";
@@ -32,7 +32,6 @@ export default function GlobalSearch() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -52,21 +51,21 @@ export default function GlobalSearch() {
   // 打开时自动聚焦
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+      const id = setTimeout(() => inputRef.current?.focus(), 100);
+      return () => clearTimeout(id);
     }
   }, [isOpen]);
 
-  // 搜索逻辑
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-    const filtered = MOCK_RESULTS.filter((r) =>
-      r.title.toLowerCase().includes(query.toLowerCase())
+  // 🔧 搜索结果改为派生状态（useMemo），避免在 effect 里 setState
+  //    同时匹配中文原文与当前语言译文
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return MOCK_RESULTS.filter(
+      (r) =>
+        r.title.toLowerCase().includes(q) || tr(r.title).toLowerCase().includes(q)
     );
-    setResults(filtered);
-  }, [query]);
+  }, [query, tr]);
 
   const handleSelect = (href: string) => {
     setIsOpen(false);
@@ -126,7 +125,7 @@ export default function GlobalSearch() {
 
               {/* 搜索结果 */}
               <div className="max-h-80 overflow-y-auto p-2">
-                {query && results.length === 0 && (
+                {query.trim() && results.length === 0 && (
                   <p className="text-center text-sm text-gray-400 py-8">
                     {tr("没有找到相关内容")} 🔍
                   </p>
@@ -140,14 +139,14 @@ export default function GlobalSearch() {
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors text-left"
                     >
                       <Icon size={16} className="text-indigo-500 shrink-0" />
-                      <span className="text-sm font-medium truncate">{r.title}</span>
+                      <span className="text-sm font-medium truncate">{tr(r.title)}</span>
                       <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-400">
-                        {r.type}
+                        {tr(r.type)}
                       </span>
                     </button>
                   );
                 })}
-                {!query && (
+                {!query.trim() && (
                   <div className="px-4 py-6 text-center text-sm text-gray-400">
                     {tr("输入关键词搜索，或按")} <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-700">Esc</kbd> {tr("关闭")}
                   </div>

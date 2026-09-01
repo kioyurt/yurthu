@@ -3,7 +3,6 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
-import { useSettings } from "@/context/SettingsContext";
 import { useT } from "@/hooks/useT";
 import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
@@ -21,7 +20,6 @@ const fmt = (s: number) => {
 
 export default function MusicPage() {
   const { tr } = useT();
-  const { settings } = useSettings();
   const audioRef = useRef<HTMLAudioElement>(null);
   const lyricContainerRef = useRef<HTMLDivElement>(null);
   const activeLyricRef = useRef<HTMLParagraphElement>(null);
@@ -43,7 +41,7 @@ export default function MusicPage() {
   const [loadError, setLoadError] = useState(false);
   const [showLyrics, setShowLyrics] = useState(true);
 
-  // 🔧 修复9: liked 持久化到 localStorage
+  // liked 持久化到 localStorage
   const [liked, setLiked] = useState<Record<string, boolean>>(() => {
     if (typeof window === "undefined") return {};
     try {
@@ -53,10 +51,10 @@ export default function MusicPage() {
     }
   });
 
-  // 🔧 修复2: 用递增 ID 解决歌词异步竞态
+  // 用递增 ID 解决歌词异步竞态
   const lyricRequestId = useRef(0);
 
-  // 🔧 修复1: 用 ref 追踪用户是否正在手动滚动
+  // 用 ref 追踪用户是否正在手动滚动
   const isUserScrolling = useRef(false);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -79,13 +77,12 @@ export default function MusicPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // 🔧 修复9: liked 变化时持久化
+  // liked 变化时持久化
   useEffect(() => {
     localStorage.setItem("music_liked", JSON.stringify(liked));
   }, [liked]);
 
   // ——— 2. 切歌时：换源 + 自动播放 + 加载歌词 ———
-  // 🔧 修复11: 依赖简化为 [index, allSongs]
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !current) return;
@@ -100,7 +97,7 @@ export default function MusicPage() {
       setIsPlaying(false);
     });
 
-    // 🔧 修复2: 竞态保护
+    // 竞态保护
     const requestId = ++lyricRequestId.current;
     (async () => {
       try {
@@ -137,7 +134,7 @@ export default function MusicPage() {
     return idx;
   }, [currentTime, lyrics]);
 
-  // 🔧 修复4: 歌词面板渲染后再绑定滚动监听
+  // 歌词面板渲染后再绑定滚动监听
   useEffect(() => {
     const container = lyricContainerRef.current;
     if (!container || !showLyrics || !lyrics.length) return;
@@ -157,7 +154,6 @@ export default function MusicPage() {
     };
   }, [showLyrics, lyrics.length]);
 
-  // 🔧 修复3: 依赖改为 [activeLyricIndex]，避免 lyrics 数组引用变化触发
   useEffect(() => {
     if (
       activeLyricIndex < 0 ||
@@ -176,7 +172,7 @@ export default function MusicPage() {
     if (Math.abs(container.scrollTop - targetScroll) > 2) {
       container.scrollTo({ top: targetScroll, behavior: "smooth" });
     }
-  }, [activeLyricIndex]); // 🔧 移除 lyrics 依赖
+  }, [activeLyricIndex]);
 
   // ——— 下一首 ———
   const next = useCallback(() => {
@@ -190,7 +186,6 @@ export default function MusicPage() {
     }
   }, [shuffle, index, allSongs.length]);
 
-  // 🔧 修复6: prev 也用 useCallback 包装
   const prev = useCallback(() => {
     if (!allSongs.length) return;
     const audio = audioRef.current;
@@ -220,7 +215,7 @@ export default function MusicPage() {
   const playlists = useMemo(() => {
     const map = new Map<string, { name: string; cover: string; ids: string[] }>();
     allSongs.forEach((s) => {
-      const albumName = s.album || "未分类"; // 🔧 修复1: 乱码修正
+      const albumName = s.album || "未分类";
       if (!map.has(albumName)) {
         map.set(albumName, { name: albumName, cover: s.cover, ids: [] });
       }
@@ -229,14 +224,13 @@ export default function MusicPage() {
     return Array.from(map.values());
   }, [allSongs]);
 
-  // 🔧 修复8: 播放歌单时跳转到第一首
+  // 播放歌单时跳转到第一首
   const playPlaylist = useCallback((ids: string[]) => {
     if (!ids.length) return;
     const firstIdx = allSongs.findIndex((s) => s.id === ids[0]);
     if (firstIdx >= 0) setIndex(firstIdx);
   }, [allSongs]);
 
-  // 🔧 修复7: onEnded 添加错误处理
   const onEnded = useCallback(() => {
     if (repeat) {
       const audio = audioRef.current;
@@ -249,7 +243,6 @@ export default function MusicPage() {
     }
   }, [repeat, next]);
 
-  // 🔧 修复10: seek 添加 readyState 检查
   const seek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const audio = audioRef.current;
     const t = Number(e.target.value);
@@ -295,13 +288,13 @@ export default function MusicPage() {
         onError={() => { setLoadError(true); setIsPlaying(false); }}
       />
 
-      <SectionTitle title="音乐" subtitle="代码与旋律，都是生活的节拍 🎶" />
+      <SectionTitle title={tr("音乐")} subtitle={tr("代码与旋律，都是生活的节拍 🎶")} />
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* ===== 左栏：播放器 + 歌词 ===== */}
         <div className="lg:col-span-1 space-y-6">
           <GlassCard className="sticky top-24 overflow-hidden">
-            {/* 🔧 修复12: 旋转封面 - 使用 CSS animation 替代 framer-motion 避免暂停跳帧 */}
+            {/* 旋转封面 - 使用 CSS animation 避免暂停跳帧 */}
             <div
               className={`w-44 h-44 mx-auto rounded-full overflow-hidden mb-5 shadow-xl shadow-indigo-500/20 ring-4 ring-indigo-200 dark:ring-indigo-800 ${
                 isPlaying ? "animate-spin" : ""
@@ -313,11 +306,11 @@ export default function MusicPage() {
 
             <h3 className="font-bold text-lg text-center">{current.title}</h3>
             <p className="text-sm text-gray-500 mb-5 text-center">
-              {current.artist} · {current.album}
+              {current.artist} · {tr(current.album ?? "未分类")}
             </p>
 
             {loadError && (
-              <p className="text-xs text-rose-400 mb-3 text-center">⚠️ 音频加载失败</p>
+              <p className="text-xs text-rose-400 mb-3 text-center">{tr("⚠️ 音频加载失败")}</p>
             )}
 
             {/* 进度条 */}
@@ -342,28 +335,28 @@ export default function MusicPage() {
               <button
                 onClick={() => setShuffle((s) => !s)}
                 className={`transition-colors ${shuffle ? "text-indigo-500" : "text-gray-400 hover:text-indigo-500"}`}
-                title="随机播放"
+                title={tr("随机播放")}
               >
                 <Shuffle size={16} />
               </button>
-              <button onClick={prev} className="text-gray-400 hover:text-indigo-500 transition-colors" title="上一首">
+              <button onClick={prev} className="text-gray-400 hover:text-indigo-500 transition-colors" title={tr("上一首")}>
                 <SkipBack size={20} />
               </button>
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={togglePlay}
                 className="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30"
-                title={isPlaying ? "暂停" : "播放"}
+                title={isPlaying ? tr("暂停") : tr("播放")}
               >
                 {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
               </motion.button>
-              <button onClick={next} className="text-gray-400 hover:text-indigo-500 transition-colors" title="下一首">
+              <button onClick={next} className="text-gray-400 hover:text-indigo-500 transition-colors" title={tr("下一首")}>
                 <SkipForward size={20} />
               </button>
               <button
                 onClick={() => setRepeat((r) => !r)}
                 className={`transition-colors ${repeat ? "text-indigo-500" : "text-gray-400 hover:text-indigo-500"}`}
-                title="单曲循环"
+                title={tr("单曲循环")}
               >
                 <Repeat size={16} />
               </button>
@@ -394,7 +387,7 @@ export default function MusicPage() {
                 }`}
               >
                 <AlignLeft size={12} />
-                {showLyrics ? "收起歌词" : "展开歌词"}
+                {showLyrics ? tr("收起歌词") : tr("展开歌词")}
               </button>
             )}
 
@@ -411,8 +404,8 @@ export default function MusicPage() {
                   <div className="border-t border-gray-200/50 dark:border-gray-700/50 mt-2">
                     <div className="px-4 py-2.5 flex items-center gap-2">
                       <Mic2 size={13} className="text-indigo-500" />
-                      <span className="text-xs font-medium text-gray-600 dark:text-gray-300">歌词</span>
-                      <span className="text-[10px] text-gray-400 ml-auto">{lyrics.length} 行</span>
+                      <span className="text-xs font-medium text-gray-600 dark:text-gray-300">{tr("歌词")}</span>
+                      <span className="text-[10px] text-gray-400 ml-auto">{tr("{count} 行", { count: lyrics.length })}</span>
                     </div>
                     <div
                       ref={lyricContainerRef}
@@ -454,8 +447,8 @@ export default function MusicPage() {
             {!hasLyrics && !dataLoading && (
               <div className="border-t border-gray-200/50 dark:border-gray-700/50 mt-2 py-6 text-center">
                 <div className="text-2xl mb-2 opacity-60">🎵</div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">纯音乐，请欣赏</p>
-                <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">用心感受旋律就好</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{tr("纯音乐，请欣赏")}</p>
+                <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">{tr("用心感受旋律就好")}</p>
               </div>
             )}
           </GlassCard>
@@ -471,10 +464,10 @@ export default function MusicPage() {
                 onClick={() => playPlaylist(pl.ids)}
                 className="flex items-center gap-4 !p-4 cursor-pointer hover:border-indigo-400/50"
               >
-                <img src={pl.cover} alt={pl.name} className="w-14 h-14 rounded-xl object-cover" />
+                <img src={pl.cover} alt={tr(pl.name)} className="w-14 h-14 rounded-xl object-cover" />
                 <div>
-                  <h4 className="font-medium text-sm">{pl.name}</h4>
-                  <p className="text-xs text-gray-400">{pl.ids.length} 首歌 · 点击播放</p>
+                  <h4 className="font-medium text-sm">{tr(pl.name)}</h4>
+                  <p className="text-xs text-gray-400">{tr("{count} 首歌 · 点击播放", { count: pl.ids.length })}</p>
                 </div>
               </GlassCard>
             ))}
@@ -483,7 +476,7 @@ export default function MusicPage() {
           <GlassCard className="!p-0 overflow-hidden">
             <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
               <h3 className="font-semibold flex items-center gap-2">
-                <Music size={16} className="text-indigo-500" /> 全部歌曲
+                <Music size={16} className="text-indigo-500" /> {tr("全部歌曲")}
               </h3>
             </div>
             <div className="divide-y divide-gray-100 dark:divide-gray-800/50">
@@ -520,13 +513,13 @@ export default function MusicPage() {
                         {song.title}
                         {songHasLyrics && (
                           <span className="text-[10px] px-1 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-500 font-normal">
-                            词
+                            {tr("词")}
                           </span>
                         )}
                       </p>
                       <p className="text-xs text-gray-400">{song.artist}</p>
                     </div>
-                    <span className="text-xs text-gray-400 hidden sm:block">{song.album}</span>
+                    <span className="text-xs text-gray-400 hidden sm:block">{tr(song.album ?? "未分类")}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

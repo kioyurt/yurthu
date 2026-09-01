@@ -1,7 +1,6 @@
 // src/components/home/RecentTimeline.tsx
 "use client";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import { useT } from "@/hooks/useT";
 import { FileText, Code2, Camera, Music4, Clock } from "lucide-react";
@@ -54,7 +53,7 @@ export default function RecentTimeline({ items }: { items: TimelineItem[] }) {
               {/* 内容 */}
               <div className="pb-4 min-w-0">
                 <p className="text-sm font-medium truncate group-hover:text-indigo-500 transition-colors">
-                  {item.title}
+                  {tr(item.title)}
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5">{item.date}</p>
               </div>

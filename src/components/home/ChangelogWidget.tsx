@@ -56,7 +56,7 @@ export default function ChangelogWidget() {
             className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400"
           >
             <span className="text-indigo-400 mt-0.5">•</span>
-            {change}
+            {tr(change)}
           </motion.div>
         ))}
       </div>

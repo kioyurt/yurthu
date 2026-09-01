@@ -1,5 +1,6 @@
 // src/hooks/useVisitorContext.ts
-import { useState, useEffect } from "react";
+import { useMemo, useSyncExternalStore } from "react";
+import { useT } from "@/hooks/useT";
 
 export type TimePeriod = "dawn" | "morning" | "afternoon" | "evening" | "night";
 export type ReferrerType = "github" | "twitter" | "google" | "direct" | "other";
@@ -41,6 +42,7 @@ function getDeviceType(): DeviceType {
   return "desktop";
 }
 
+// 中文原文作为翻译 key，实际显示由 tr() 处理
 const GREETINGS: Record<TimePeriod, { greeting: string; subtitle: string; theme: "day" | "night" }> = {
   dawn: {
     greeting: "早安，早起的人 🌅",
@@ -77,37 +79,62 @@ const REFERRER_MESSAGES: Record<ReferrerType, string | null> = {
   other: "欢迎新朋友 🎉",
 };
 
+/* ============================================================
+   🔧 用 useSyncExternalStore 派生访客上下文，替代 effect + setState：
+   - 服务端/水合阶段返回稳定的默认快照（与服务端 HTML 一致）
+   - 挂载后自动切换到真实的时间段/来源/设备，无多余渲染
+   ============================================================ */
+interface RawContext {
+  timePeriod: TimePeriod;
+  referrerType: ReferrerType;
+  device: DeviceType;
+}
+
+const SERVER_CONTEXT: RawContext = {
+  timePeriod: "morning",
+  referrerType: "direct",
+  device: "desktop",
+};
+
+// 客户端快照在挂载期间保持不变（时间/来源/设备在一次页面会话内固定）
+let cachedClientContext: RawContext | null = null;
+
+function computeRawContext(): RawContext {
+  if (typeof window === "undefined") return SERVER_CONTEXT;
+  if (!cachedClientContext) {
+    cachedClientContext = {
+      timePeriod: getTimePeriod(),
+      referrerType: getReferrerType(),
+      device: getDeviceType(),
+    };
+  }
+  return cachedClientContext;
+}
+
+function subscribeNoop() {
+  return () => {};
+}
+
 export function useVisitorContext(): VisitorContext {
-  const [context, setContext] = useState<VisitorContext>({
-    timePeriod: "morning",
-    referrerType: "direct",
-    device: "desktop",
-    greeting: "你好 👋",
-    subtitle: "",
-    theme: "day",
-  });
+  const { tr } = useT();
+  const raw = useSyncExternalStore(subscribeNoop, computeRawContext, () => SERVER_CONTEXT);
 
-  useEffect(() => {
-    const timePeriod = getTimePeriod();
-    const referrerType = getReferrerType();
-    const device = getDeviceType();
-    const timeGreeting = GREETINGS[timePeriod];
-    const referrerMsg = REFERRER_MESSAGES[referrerType];
+  return useMemo(() => {
+    const timeGreeting = GREETINGS[raw.timePeriod];
+    const referrerMsg = REFERRER_MESSAGES[raw.referrerType];
 
-    // 组合问候语：时间问候 + 来源欢迎
-    const greeting = referrerType === "direct"
-      ? timeGreeting.greeting
-      : `${referrerMsg} ${timeGreeting.greeting}`;
+    // 组合问候语：来源欢迎 + 时间问候（分段翻译，保证多语言生效）
+    const greeting = raw.referrerType === "direct" || !referrerMsg
+      ? tr(timeGreeting.greeting)
+      : `${tr(referrerMsg)} ${tr(timeGreeting.greeting)}`;
 
-    setContext({
-      timePeriod,
-      referrerType,
-      device,
+    return {
+      timePeriod: raw.timePeriod,
+      referrerType: raw.referrerType,
+      device: raw.device,
       greeting,
-      subtitle: timeGreeting.subtitle,
+      subtitle: tr(timeGreeting.subtitle),
       theme: timeGreeting.theme,
-    });
-  }, []);
-
-  return context;
+    };
+  }, [raw, tr]);
 }

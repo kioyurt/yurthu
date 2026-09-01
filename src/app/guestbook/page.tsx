@@ -127,7 +127,7 @@ export default function GuestbookPage() {
                       <span className="font-medium text-sm">{msg.name}</span>
                       <span className="text-xs text-gray-400">{msg.date}</span>
                     </div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{msg.content}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{tr(msg.content)}</p>
                     
                     {/* Actions */}
                     <div className="flex items-center gap-4 mt-3">
@@ -152,8 +152,8 @@ export default function GuestbookPage() {
                       <div className="mt-3 pl-4 border-l-2 border-indigo-200 dark:border-indigo-800 space-y-2">
                         {msg.replies.map((reply) => (
                           <div key={reply.id} className="text-sm">
-                            <span className="font-medium text-indigo-500">{reply.avatar} {reply.name}：</span>
-                            <span className="text-gray-600 dark:text-gray-300">{reply.content}</span>
+                            <span className="font-medium text-indigo-500">{reply.avatar} {tr(reply.name)}：</span>
+                            <span className="text-gray-600 dark:text-gray-300">{tr(reply.content)}</span>
                           </div>
                         ))}
                       </div>
@@ -168,4 +168,3 @@ export default function GuestbookPage() {
     </div>
   );
 }
-

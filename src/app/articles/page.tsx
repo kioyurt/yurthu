@@ -5,25 +5,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { useT } from "@/hooks/useT";
-import { Search, Calendar, Eye, Heart, Tag } from "lucide-react";
+import { Search, Calendar, Eye, Heart } from "lucide-react";
 
 const categories = ["全部", "前端", "后端", "AI", "生活", "摄影", "开源"];
-
-const categoryMap: Record<string, string> = {
-  "全部": "全部",
-  "前端": "前端",
-  "后端": "后端",
-  "AI": "AI",
-  "生活": "生活",
-  "摄影": "摄影",
-  "开源": "开源",
-};
 
 const articles = [
   {
     id: 1,
     title: "2026年前端开发趋势：AI 驱动的新范式",
-    summary: "2026年前端开发趋势：AI 驱动的新范式 - summary",
+    summary: "探索 AI 如何改变前端开发流程，从代码生成到智能调试...",
     cover: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop",
     category: "前端",
     tags: ["React", "AI", "2026"],
@@ -132,7 +122,7 @@ export default function ArticlesPage() {
                   : "glass hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
               }`}
             >
-              {cat}
+              {tr(cat)}
             </button>
           ))}
         </div>
@@ -155,12 +145,12 @@ export default function ArticlesPage() {
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={article.cover}
-                    alt={article.title}
+                    alt={tr(article.title)}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute top-3 left-3">
                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
-                      {article.category}
+                      {tr(article.category)}
                     </span>
                   </div>
                 </div>
@@ -168,17 +158,17 @@ export default function ArticlesPage() {
                 {/* Content */}
                 <div className="p-5">
                   <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-indigo-500 transition-colors">
-                    {article.title}
+                    {tr(article.title)}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
-                    {article.summary}
+                    {tr(article.summary)}
                   </p>
 
                   {/* Tags */}
                   <div className="flex gap-2 flex-wrap mb-4">
                     {article.tags.map((tag) => (
                       <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                        #{tag}
+                        #{tr(tag)}
                       </span>
                     ))}
                   </div>
@@ -207,7 +197,7 @@ export default function ArticlesPage() {
       {filtered.length === 0 && (
         <div className="text-center py-16 text-gray-400">
           <p className="text-4xl mb-4">🔍</p>
-          <p>没有找到相关文章</p>
+          <p>{tr("没有找到相关文章")}</p>
         </div>
       )}
     </div>

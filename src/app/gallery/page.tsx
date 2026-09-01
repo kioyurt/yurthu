@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { Camera, X, ChevronLeft, ChevronRight, Download, MapPin, Calendar, ArrowLeft, Layers } from "lucide-react";
+import { Camera, X, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { useT } from "@/hooks/useT";
 import type { Photo, Album } from "@/data/photos";
 import { getAlbums, getAlbumPhotos } from "@/lib/api";
@@ -16,7 +15,6 @@ interface FlatPhoto extends Photo {
 export default function PhotoWallPage() {
   const { tr } = useT();
   const [albums, setAlbums] = useState<Album[]>([]);
-  const [albumCovers, setAlbumCovers] = useState<Record<number, string[]>>({});
   const [activeAlbumId, setActiveAlbumId] = useState<number | null>(null);
   const [albumPhotos, setAlbumPhotos] = useState<FlatPhoto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,15 +25,6 @@ export default function PhotoWallPage() {
       try {
         const list = await getAlbums();
         setAlbums(list);
-
-        const covers: Record<number, string[]> = {};
-        await Promise.all(
-          list.map(async (album) => {
-            const photos = await getAlbumPhotos(album.id);
-            covers[album.id] = photos.slice(0, 3).map((p) => p.cover || p.url);
-          })
-        );
-        setAlbumCovers(covers);
       } finally {
         setLoading(false);
       }
@@ -102,7 +91,7 @@ export default function PhotoWallPage() {
           )}
           <Camera className="w-7 h-7 text-sky-500" />
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-            {activeAlbum ? activeAlbum.title : tr("照片墙")}
+            {activeAlbum ? tr(activeAlbum.title) : tr("照片墙")}
           </h1>
         </div>
         <p className="text-slate-600 dark:text-slate-300 ml-11">
@@ -118,7 +107,7 @@ export default function PhotoWallPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
           {albums.map((album) => (
             <div key={album.id} onClick={() => openAlbum(album.id)} className="cursor-pointer">
-              <div className="text-lg font-semibold">{album.title}</div>
+              <div className="text-lg font-semibold">{tr(album.title)}</div>
             </div>
           ))}
         </div>
@@ -139,7 +128,7 @@ export default function PhotoWallPage() {
                 onClick={() => openLightbox(i)}
                 className="group relative mb-6 break-inside-avoid cursor-pointer"
               >
-                <img src={photo.url} alt={photo.caption || photo.albumTitle} className="w-full rounded-lg" />
+                <img src={photo.url} alt={tr(photo.caption ?? "") || tr(photo.title)} className="w-full rounded-lg" />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -192,13 +181,13 @@ export default function PhotoWallPage() {
             >
               <img
                 src={currentPhoto.url}
-                alt={currentPhoto.caption || "photo"}
+                alt={tr(currentPhoto.caption ?? "") || tr(currentPhoto.title)}
                 className="max-h-[80vh] w-auto object-contain rounded-lg shadow-2xl"
               />
             </motion.div>
             <div className="absolute bottom-8 left-0 right-0 text-center text-white z-10 pointer-events-none">
               <motion.p initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-                {currentPhoto.caption || "untitled"}
+                {currentPhoto.caption ? tr(currentPhoto.caption) : tr("未命名")}
               </motion.p>
             </div>
           </motion.div>

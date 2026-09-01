@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
 import { useT } from "@/hooks/useT";
-import { ExternalLink, Heart, Globe, Plus } from "lucide-react";
+import { ExternalLink, Heart, Plus } from "lucide-react";
 
 const friends = [
   {
@@ -82,10 +82,10 @@ export default function FriendsPage() {
             />
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold flex items-center gap-2">
-                {friend.name}
+                {tr(friend.name)}
                 <ExternalLink size={12} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{friend.description}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{tr(friend.description)}</p>
               <div className="flex gap-1.5 mt-2">
                 {friend.tags.map((tag) => (
                   <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">

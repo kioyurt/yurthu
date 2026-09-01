@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
 import { useT } from "@/hooks/useT";
-import { FileText, Calendar, Tag } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 const archiveData = [
   {

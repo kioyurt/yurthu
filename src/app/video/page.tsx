@@ -27,7 +27,7 @@ const platforms = [
     name: "Bilibili",
     url: "https://space.bilibili.com/247027161?spm_id_from=333.1007.0.0",
     color: "hover:bg-[#00a1d6] hover:text-white hover:border-[#00a1d6]",
-    label: "B站",
+    label: "Bilibili",
   },
 ] as const;
 
@@ -47,8 +47,8 @@ interface Video {
   views: number;
   likes: number;
   date: string;
-  platform?: PlatformName;       // ✅ 新增：标记该视频首发平台
-  externalUrl?: string;          // ✅ 新增：可选的直链
+  platform?: PlatformName;       // 标记该视频首发平台
+  externalUrl?: string;          // 可选的直链
 }
 
 const videos: Video[] = [
@@ -150,9 +150,9 @@ export default function VideoPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-24">
-      <SectionTitle title="视频" subtitle="用影像记录技术与生活 🎬" />
+      <SectionTitle title={tr("视频")} subtitle={tr("用影像记录技术与生活 🎬")} />
 
-      {/* ✅ 新增：平台链接栏 */}
+      {/* 平台链接栏 */}
       <div className="flex justify-center gap-3 flex-wrap mb-10">
         {platforms.map((p) => (
           <a
@@ -194,7 +194,7 @@ export default function VideoPage() {
       <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence mode="popLayout">
           {filtered.map((video, i) => {
-            // ✅ 如果有外链，点击直接跳转；否则打开模态播放器
+            // 如果有外链，点击直接跳转；否则打开模态播放器
             const Wrapper = video.externalUrl ? "a" : "div";
             const wrapperProps = video.externalUrl
               ? {
@@ -223,7 +223,7 @@ export default function VideoPage() {
                     <div className="relative aspect-video overflow-hidden">
                       <img
                         src={video.thumbnail}
-                        alt={video.title}
+                        alt={tr(video.title)}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       {/* Play overlay */}
@@ -243,7 +243,7 @@ export default function VideoPage() {
                       <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-white text-xs font-mono">
                         {video.duration}
                       </span>
-                      {/* ✅ 平台徽章 */}
+                      {/* 平台徽章 */}
                       {video.platform && (
                         <span
                           className={`absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide backdrop-blur-sm ${
@@ -258,10 +258,10 @@ export default function VideoPage() {
                     {/* Info */}
                     <div className="p-4">
                       <h3 className="font-medium text-sm line-clamp-2 group-hover:text-indigo-500 transition-colors">
-                        {video.title}
+                        {tr(video.title)}
                       </h3>
                       <div className="flex items-center justify-between mt-3 text-xs text-gray-400">
-                        <span>{video.category}</span>
+                        <span>{tr(video.category)}</span>
                         <div className="flex items-center gap-3">
                           <span className="flex items-center gap-1">
                             <Eye size={12} /> {(video.views / 1000).toFixed(1)}k
@@ -292,7 +292,7 @@ export default function VideoPage() {
           >
             <div className="w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-white font-semibold">{playingVideo.title}</h3>
+                <h3 className="text-white font-semibold">{tr(playingVideo.title)}</h3>
                 <button
                   onClick={() => setPlayingVideo(null)}
                   className="text-white/70 hover:text-white"
@@ -303,15 +303,15 @@ export default function VideoPage() {
               <div className="aspect-video bg-gray-900 rounded-2xl overflow-hidden flex items-center justify-center">
                 <div className="text-center text-gray-400">
                   <Play size={48} className="mx-auto mb-4 text-indigo-500" />
-                  <p>视频播放器区域</p>
+                  <p>{tr("视频播放器区域")}</p>
                   <p className="text-sm mt-2">
-                    （集成 ReactPlayer / YouTube / Bilibili 嵌入）
+                    {tr("（集成 ReactPlayer / YouTube / Bilibili 嵌入）")}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-6 mt-4 text-sm text-gray-400">
                 <span className="flex items-center gap-1">
-                  <Eye size={14} /> {playingVideo.views} 次观看
+                  <Eye size={14} /> {tr("{count} 次观看", { count: playingVideo.views })}
                 </span>
                 <span className="flex items-center gap-1">
                   <ThumbsUp size={14} /> {playingVideo.likes}

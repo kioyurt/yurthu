@@ -1,11 +1,12 @@
 // src/app/articles/[slug]/page.tsx
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Calendar, Eye, Heart, ArrowLeft, Share2, Bookmark, Clock } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useT } from "@/hooks/useT";
 
 const articleData = {
   title: "2026年前端开发趋势：AI 驱动的新范式",
@@ -61,6 +62,7 @@ async function ArticleList() {
 };
 
 export default function ArticleDetailPage() {
+  const { tr } = useT();
   const [liked, setLiked] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -85,22 +87,22 @@ export default function ArticleDetailPage() {
 
       <div className="max-w-3xl mx-auto px-4 pt-24 pb-16">
         {/* Back */}
-        <a href="/articles" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-500 transition-colors mb-8">
-          <ArrowLeft size={16} /> 返回文章列表
-        </a>
+        <Link href="/articles" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-500 transition-colors mb-8">
+          <ArrowLeft size={16} /> {tr("返回文章列表")}
+        </Link>
 
         {/* Header */}
         <motion.header initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex gap-2 mb-4">
             <span className="px-3 py-1 rounded-full text-xs bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-              {articleData.category}
+              {tr(articleData.category)}
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-6">{articleData.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-6">{tr(articleData.title)}</h1>
           <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
             <span className="flex items-center gap-1"><Calendar size={14} /> {articleData.date}</span>
             <span className="flex items-center gap-1"><Eye size={14} /> {articleData.views}</span>
-            <span className="flex items-center gap-1"><Clock size={14} /> {articleData.readTime}</span>
+            <span className="flex items-center gap-1"><Clock size={14} /> {tr(articleData.readTime)}</span>
           </div>
         </motion.header>
 
@@ -122,7 +124,7 @@ export default function ArticleDetailPage() {
           className="markdown-body prose prose-lg dark:prose-invert max-w-none"
         >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {articleData.content}
+            {tr(articleData.content)}
           </ReactMarkdown>
         </motion.div>
 
@@ -130,7 +132,7 @@ export default function ArticleDetailPage() {
         <div className="flex gap-2 flex-wrap mt-10 pt-6 border-t border-gray-200 dark:border-gray-800">
           {articleData.tags.map((tag) => (
             <span key={tag} className="px-3 py-1.5 rounded-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-              #{tag}
+              #{tr(tag)}
             </span>
           ))}
         </div>
@@ -146,13 +148,13 @@ export default function ArticleDetailPage() {
             }`}
           >
             <Heart size={18} className={liked ? "fill-red-500" : ""} />
-            {liked ? "已点赞" : "点赞"} ({articleData.likes + (liked ? 1 : 0)})
+            {liked ? tr("已点赞") : tr("点赞")} ({articleData.likes + (liked ? 1 : 0)})
           </button>
           <button className="flex items-center gap-2 px-6 py-3 glass hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all">
-            <Share2 size={18} /> 分享
+            <Share2 size={18} /> {tr("分享")}
           </button>
           <button className="flex items-center gap-2 px-6 py-3 glass hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all">
-            <Bookmark size={18} /> 收藏
+            <Bookmark size={18} /> {tr("收藏")}
           </button>
         </div>
       </div>

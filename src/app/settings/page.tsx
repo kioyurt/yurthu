@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
@@ -37,25 +37,44 @@ function playClick() {
   } catch {}
 }
 
+// 🔧 空订阅 + 常量快照：安全检测"是否已挂载客户端"
+function subscribeNoop() {
+  return () => {};
+}
+
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { settings, loaded, updateSettings, resetSettings } = useSettings();
   const { tr } = useT();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const [savedTip, setSavedTip] = useState(false);
   const timer = useRef<number | null>(null);
-
-  useEffect(() => setMounted(true), []);
+  // 🔧 修复：跳过首次加载，只有用户真正修改设置后才显示"已自动保存"
+  const skipTip = useRef(true);
 
   // 自动保存提示
+  // 🔧 修复：加载完成后首次触发（来自 localStorage 恢复）不弹提示；
+  //    后续每次用户修改设置才提示，并在组件卸载时清理定时器。
   useEffect(() => {
     if (!loaded) return;
+    if (skipTip.current) {
+      skipTip.current = false;
+      return;
+    }
     setSavedTip(true);
     if (timer.current !== null) {
       clearTimeout(timer.current);
     }
     timer.current = window.setTimeout(() => setSavedTip(false), 1500);
   }, [settings, loaded]);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current !== null) {
+        clearTimeout(timer.current);
+      }
+    };
+  }, []);
 
   const toggle = (key: keyof Settings) => {
     if (settings.sound) playClick();
@@ -90,7 +109,6 @@ export default function SettingsPage() {
               { value: "dark", label: tr("深色"), icon: Moon },
               { value: "system", label: tr("跟随系统"), icon: Monitor },
             ].map((t) => {
-              // 🔧 修复：选中态用动态 accent 色而非写死 indigo
               const isSelected = mounted && theme === t.value;
               return (
                 <button

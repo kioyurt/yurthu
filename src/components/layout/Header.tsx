@@ -1,6 +1,6 @@
 // src/components/layout/Header.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,7 +11,7 @@ import {
   Video, User, Settings, Sun, Moon, Menu, X
 } from "lucide-react";
 import { GithubIcon } from "@/components/ui/BrandIcons";
-import { useT } from "@/hooks/useT";  // ✅ 新增
+import { useT } from "@/hooks/useT";
 
 // label 保持中文作为 key，tr() 负责翻译
 const navItems = [
@@ -30,17 +30,23 @@ const navItems = [
   { href: "/settings", label: "设置",   icon: Settings },
 ];
 
+// 🔧 空订阅 + 常量快照：用于安全检测"是否已挂载客户端"，
+//    替代 useState+useEffect 方案（避免 effect 中同步 setState）
+function subscribeNoop() {
+  return () => {};
+}
+
 export default function Header() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const { tr } = useT();  // ✅ 新增
-  const [mounted, setMounted] = useState(false);
+  const { tr } = useT();
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
+    handler();
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, []);
@@ -96,7 +102,7 @@ export default function Header() {
                     )}
                     <span className="relative z-10 flex items-center gap-1">
                       <Icon size={14} />
-                      {tr(item.label)}  {/* ✅ 用 tr() 翻译 */}
+                      {tr(item.label)}
                     </span>
                   </Link>
                 );
@@ -109,7 +115,7 @@ export default function Header() {
                 <button
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                   className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  aria-label="Toggle theme"
+                  aria-label={tr("切换主题")}
                 >
                   {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
                 </button>
@@ -117,7 +123,7 @@ export default function Header() {
               <button
                 onClick={() => setMobileOpen(true)}
                 className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-                aria-label="Open menu"
+                aria-label={tr("打开菜单")}
               >
                 <Menu size={20} />
               </button>
@@ -145,7 +151,7 @@ export default function Header() {
               className="fixed right-0 top-0 bottom-0 w-72 bg-white dark:bg-gray-900 z-50 p-6 lg:hidden overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-8">
-                <span className="font-bold gradient-text">{tr("导航")}</span>  {/* ✅ */}
+                <span className="font-bold gradient-text">{tr("导航")}</span>
                 <button onClick={() => setMobileOpen(false)}>
                   <X size={20} />
                 </button>
@@ -166,7 +172,7 @@ export default function Header() {
                       }`}
                     >
                       <Icon size={16} />
-                      {tr(item.label)}  {/* ✅ */}
+                      {tr(item.label)}
                     </Link>
                   );
                 })}

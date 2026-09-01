@@ -4,10 +4,7 @@ import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
 import { useT } from "@/hooks/useT";
-import {
-  Monitor, Smartphone, Server, Globe,
-  Cpu, HardDrive, Wifi, Zap
-} from "lucide-react";
+import { Monitor, Smartphone, Server, Wifi } from "lucide-react";
 
 const spaces = [
   {
