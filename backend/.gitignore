@@ -1,0 +1,22 @@
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# Python 编译产物
+__pycache__/
+*.py[cod]
+
+# 环境变量
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# 数据库
+*.db
+*.sqlite
+*.sqlite3
