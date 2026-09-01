@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
+import { useT } from "@/hooks/useT";
 import { FileText, Calendar, Tag } from "lucide-react";
 
 const archiveData = [
@@ -64,6 +65,7 @@ const archiveData = [
 ];
 
 export default function ArchivesPage() {
+  const { tr } = useT();
   const totalArticles = archiveData.reduce(
     (sum, year) => sum + year.months.reduce((s, m) => s + m.articles.length, 0),
     0
@@ -71,7 +73,7 @@ export default function ArchivesPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-24">
-      <SectionTitle title="归档" subtitle={`共 ${totalArticles} 篇文章，记录成长的每一步`} />
+      <SectionTitle title={tr("归档")} subtitle={tr("共 {count} 篇文章，记录成长的每一步", { count: totalArticles })} />
 
       <div className="relative">
         {/* Timeline Line */}
@@ -101,9 +103,9 @@ export default function ArchivesPage() {
                   <div className="absolute left-3 top-1.5 w-2.5 h-2.5 rounded-full bg-purple-400 border-2 border-white dark:border-gray-900" />
                   <h3 className="font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                     <Calendar size={14} className="text-purple-400" />
-                    {monthData.month}
+                    {tr(monthData.month)}
                     <span className="text-xs text-gray-400 font-normal">
-                      ({monthData.articles.length} 篇)
+                      ({monthData.articles.length} {tr("篇")})
                     </span>
                   </h3>
                 </motion.div>
@@ -121,12 +123,12 @@ export default function ArchivesPage() {
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-sm group-hover:text-indigo-500 transition-colors truncate">
-                              {article.title}
+                              {tr(article.title)}
                             </h4>
                             <div className="flex gap-1.5 mt-1.5">
                               {article.tags.map((tag) => (
                                 <span key={tag} className="text-xs text-indigo-500/70">
-                                  #{tag}
+                                  #{tr(tag)}
                                 </span>
                               ))}
                             </div>

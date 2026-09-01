@@ -138,6 +138,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (loaded) {
       document.documentElement.lang = settings.language;
+      document.documentElement.classList.add("notranslate");
+      document.documentElement.setAttribute("translate", "no");
+      document.body?.setAttribute("translate", "no");
     }
   }, [settings.language, loaded]);
 

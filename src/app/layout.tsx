@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
-      <body className={`${inter.variable} ${noto.variable} font-sans`}>
+    <html lang="zh-CN" suppressHydrationWarning className="notranslate">
+      <body translate="no" className={`${inter.variable} ${noto.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <SettingsProvider>
             <div className="min-h-screen flex flex-col">

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
 import { useSettings, type Settings } from "@/context/SettingsContext";
+import { useT } from "@/hooks/useT";
 import {
   Sun, Moon, Monitor, Palette, Bell, Globe,
   Sparkles, RotateCcw, Check,
@@ -39,9 +40,10 @@ function playClick() {
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { settings, loaded, updateSettings, resetSettings } = useSettings();
+  const { tr } = useT();
   const [mounted, setMounted] = useState(false);
   const [savedTip, setSavedTip] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<number | null>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -49,8 +51,10 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!loaded) return;
     setSavedTip(true);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => setSavedTip(false), 1500);
+    if (timer.current !== null) {
+      clearTimeout(timer.current);
+    }
+    timer.current = window.setTimeout(() => setSavedTip(false), 1500);
   }, [settings, loaded]);
 
   const toggle = (key: keyof Settings) => {
@@ -59,12 +63,12 @@ export default function SettingsPage() {
   };
 
   const toggleItems: { key: keyof Settings; label: string; desc: string }[] = [
-    { key: "animations", label: "页面动画", desc: "启用 Framer Motion 过渡效果" },
-    { key: "particles", label: "粒子背景", desc: "首页粒子动画效果" },
-    { key: "sound", label: "音效", desc: "交互音效反馈" },
-    { key: "notifications", label: "通知提醒", desc: "新文章/评论通知" },
-    { key: "compactMode", label: "紧凑模式", desc: "减小间距，显示更多内容" },
-    { key: "showReadingTime", label: "阅读时间", desc: "在文章卡片上显示预计阅读时间" },
+    { key: "animations", label: tr("页面动画"), desc: tr("启用 Framer Motion 过渡效果") },
+    { key: "particles", label: tr("粒子背景"), desc: tr("首页粒子动画效果") },
+    { key: "sound", label: tr("音效"), desc: tr("交互音效反馈") },
+    { key: "notifications", label: tr("通知提醒"), desc: tr("新文章/评论通知") },
+    { key: "compactMode", label: tr("紧凑模式"), desc: tr("减小间距，显示更多内容") },
+    { key: "showReadingTime", label: tr("阅读时间"), desc: tr("在文章卡片上显示预计阅读时间") },
   ];
 
   // 🔧 当前选中色的 ring 颜色直接用 inline style
@@ -72,19 +76,19 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-24">
-      <SectionTitle title="设置" subtitle="所有修改自动保存，刷新后依然生效" />
+      <SectionTitle title={tr("设置")} subtitle={tr("所有修改自动保存，刷新后依然生效")} />
 
       <div className="space-y-6">
         {/* ===== 深浅色主题 ===== */}
         <GlassCard>
           <h3 className="font-semibold flex items-center gap-2 mb-4">
-            <Palette size={18} className="accent-text" /> 主题
+            <Palette size={18} className="accent-text" /> {tr("主题")}
           </h3>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { value: "light", label: "浅色", icon: Sun },
-              { value: "dark", label: "深色", icon: Moon },
-              { value: "system", label: "跟随系统", icon: Monitor },
+              { value: "light", label: tr("浅色"), icon: Sun },
+              { value: "dark", label: tr("深色"), icon: Moon },
+              { value: "system", label: tr("跟随系统"), icon: Monitor },
             ].map((t) => {
               // 🔧 修复：选中态用动态 accent 色而非写死 indigo
               const isSelected = mounted && theme === t.value;
@@ -122,7 +126,7 @@ export default function SettingsPage() {
         {/* ===== 主题色 ===== */}
         <GlassCard>
           <h3 className="font-semibold flex items-center gap-2 mb-4">
-            <Sparkles size={18} className="accent-text" /> 主题色
+            <Sparkles size={18} className="accent-text" /> {tr("主题色")}
           </h3>
           <div className="flex gap-3 flex-wrap">
             {accentColors.map((color) => {
@@ -153,18 +157,18 @@ export default function SettingsPage() {
             })}
           </div>
           <p className="mt-3 text-xs text-gray-400">
-            当前：
+            {tr("当前：")}
             <span className="font-medium" style={{ color: currentAccent }}>
               {currentAccent}
             </span>
-            {" "}· 全站主题色已同步更新
+            {" "}· {tr("全站主题色已同步更新")}
           </p>
         </GlassCard>
 
         {/* ===== 偏好开关 ===== */}
         <GlassCard>
           <h3 className="font-semibold flex items-center gap-2 mb-4">
-            <Bell size={18} className="text-green-500" /> 偏好设置
+            <Bell size={18} className="text-green-500" /> {tr("偏好设置")}
           </h3>
           <div className="space-y-4">
             {toggleItems.map((item) => {
@@ -202,7 +206,7 @@ export default function SettingsPage() {
         {/* ===== 语言 ===== */}
         <GlassCard>
           <h3 className="font-semibold flex items-center gap-2 mb-4">
-            <Globe size={18} className="text-blue-500" /> 语言
+            <Globe size={18} className="text-blue-500" /> {tr("语言")}
           </h3>
           <select
             value={settings.language}
@@ -228,7 +232,7 @@ export default function SettingsPage() {
               boxShadow: `0 8px 24px ${currentAccent}30`,
             }}
           >
-            <RotateCcw size={18} /> 恢复默认设置
+            <RotateCcw size={18} /> {tr("恢复默认设置")}
           </motion.button>
           <span
             className={`flex items-center gap-1 text-sm transition-opacity ${
@@ -236,7 +240,7 @@ export default function SettingsPage() {
             }`}
             style={{ color: "#10b981" }}
           >
-            <Check size={16} /> 已自动保存
+            <Check size={16} /> {tr("已自动保存")}
           </span>
         </div>
       </div>

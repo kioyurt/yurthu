@@ -1,10 +1,10 @@
 "use client";
-
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
 import { useSettings } from "@/context/SettingsContext";
+import { useT } from "@/hooks/useT";
 import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
   Repeat, Shuffle, Music, Heart, AlignLeft, Mic2,
@@ -13,24 +13,25 @@ import type { Track, LyricLine } from "@/data/music";
 import { getTracks, getLyrics } from "@/lib/api";
 
 const fmt = (s: number) => {
-  if (!isFinite(s)) return "0:00";
+  if (!isFinite(s) || s < 0) return "0:00";
   const m = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
   return `${m}:${String(sec).padStart(2, "0")}`;
 };
 
 export default function MusicPage() {
+  const { tr } = useT();
   const { settings } = useSettings();
   const audioRef = useRef<HTMLAudioElement>(null);
   const lyricContainerRef = useRef<HTMLDivElement>(null);
   const activeLyricRef = useRef<HTMLParagraphElement>(null);
 
-  // —— 数据状态 ——
+  // ——— 数据状态 ———
   const [allSongs, setAllSongs] = useState<Track[]>([]);
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
-  // —— 播放状态 ——
+  // ——— 播放状态 ———
   const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -39,50 +40,85 @@ export default function MusicPage() {
   const [muted, setMuted] = useState(false);
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(false);
-  const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [loadError, setLoadError] = useState(false);
   const [showLyrics, setShowLyrics] = useState(true);
-  // 🔧 修复1: 用 ref 追踪用户是否正在手动滚动，避免自动滚动打断用户操作
+
+  // 🔧 修复9: liked 持久化到 localStorage
+  const [liked, setLiked] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      return JSON.parse(localStorage.getItem("music_liked") || "{}");
+    } catch {
+      return {};
+    }
+  });
+
+  // 🔧 修复2: 用递增 ID 解决歌词异步竞态
+  const lyricRequestId = useRef(0);
+
+  // 🔧 修复1: 用 ref 追踪用户是否正在手动滚动
   const isUserScrolling = useRef(false);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const current = allSongs[index] || null;
 
-  // —— 1. 初始加载歌曲列表 ——
+  // ——— 1. 初始加载歌曲列表 ———
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         const songs = await getTracks();
+        if (cancelled) return;
         setAllSongs(songs);
-        const initLiked: Record<string, boolean> = {};
-        songs.forEach((s) => { initLiked[s.id] = false; });
-        setLiked(initLiked);
+      } catch (err) {
+        console.error("Failed to load tracks:", err);
       } finally {
-        setDataLoading(false);
+        if (!cancelled) setDataLoading(false);
       }
     })();
+    return () => { cancelled = true; };
   }, []);
 
-  // —— 2. 切歌时：换源 + 自动播放 + 加载歌词 ——
+  // 🔧 修复9: liked 变化时持久化
+  useEffect(() => {
+    localStorage.setItem("music_liked", JSON.stringify(liked));
+  }, [liked]);
+
+  // ——— 2. 切歌时：换源 + 自动播放 + 加载歌词 ———
+  // 🔧 修复11: 依赖简化为 [index, allSongs]
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !current) return;
+
     setLoadError(false);
     setCurrentTime(0);
-    audio.load();
-    audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    setDuration(0);
 
+    audio.load();
+    audio.play().then(() => setIsPlaying(true)).catch(() => {
+      // 浏览器自动播放策略可能阻止，静默处理
+      setIsPlaying(false);
+    });
+
+    // 🔧 修复2: 竞态保护
+    const requestId = ++lyricRequestId.current;
     (async () => {
-      const lrc = await getLyrics(current.id);
-      setLyrics(lrc);
-      // 切歌后重置滚动位置
-      if (lyricContainerRef.current) {
-        lyricContainerRef.current.scrollTop = 0;
+      try {
+        const lrc = await getLyrics(current.id);
+        // 只有在请求仍然是最新的时才更新
+        if (lyricRequestId.current !== requestId) return;
+        setLyrics(lrc);
+        // 切歌后重置滚动位置
+        if (lyricContainerRef.current) {
+          lyricContainerRef.current.scrollTop = 0;
+        }
+      } catch {
+        if (lyricRequestId.current === requestId) setLyrics([]);
       }
     })();
-  }, [index, current?.id]);
+  }, [index, allSongs]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // —— 3. 音量 / 静音同步 ——
+  // ——— 3. 音量 / 静音同步 ———
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -90,7 +126,7 @@ export default function MusicPage() {
     audio.muted = muted;
   }, [volume, muted]);
 
-  // ✅ 先声明 activeLyricIndex（移到这里）
+  // 计算当前歌词行索引
   const activeLyricIndex = useMemo(() => {
     if (!lyrics.length) return -1;
     let idx = -1;
@@ -101,10 +137,10 @@ export default function MusicPage() {
     return idx;
   }, [currentTime, lyrics]);
 
-  // 🔧 修复2: 监听用户滚动，暂停自动滚动 2 秒
+  // 🔧 修复4: 歌词面板渲染后再绑定滚动监听
   useEffect(() => {
     const container = lyricContainerRef.current;
-    if (!container) return;
+    if (!container || !showLyrics || !lyrics.length) return;
 
     const handleScroll = () => {
       isUserScrolling.current = true;
@@ -115,13 +151,16 @@ export default function MusicPage() {
     };
 
     container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      clearTimeout(scrollTimer.current);
+    };
+  }, [showLyrics, lyrics.length]);
 
-  // 🔧 修复3: 用 scrollTo 替代 scrollBy，消除抖动
-  //    现在 activeLyricIndex 已经在上面声明了，这里可以安全引用
+  // 🔧 修复3: 依赖改为 [activeLyricIndex]，避免 lyrics 数组引用变化触发
   useEffect(() => {
     if (
+      activeLyricIndex < 0 ||
       !activeLyricRef.current ||
       !lyricContainerRef.current ||
       isUserScrolling.current
@@ -129,7 +168,6 @@ export default function MusicPage() {
 
     const container = lyricContainerRef.current;
     const activeEl = activeLyricRef.current;
-
     const containerHeight = container.clientHeight;
     const elTop = activeEl.offsetTop;
     const elHeight = activeEl.offsetHeight;
@@ -138,10 +176,9 @@ export default function MusicPage() {
     if (Math.abs(container.scrollTop - targetScroll) > 2) {
       container.scrollTo({ top: targetScroll, behavior: "smooth" });
     }
-  }, [activeLyricIndex, lyrics]);  // ← 现在不会报错了
+  }, [activeLyricIndex]); // 🔧 移除 lyrics 依赖
 
-
-  // —— 下一首 ——
+  // ——— 下一首 ———
   const next = useCallback(() => {
     if (!allSongs.length) return;
     if (shuffle) {
@@ -153,7 +190,8 @@ export default function MusicPage() {
     }
   }, [shuffle, index, allSongs.length]);
 
-  const prev = () => {
+  // 🔧 修复6: prev 也用 useCallback 包装
+  const prev = useCallback(() => {
     if (!allSongs.length) return;
     const audio = audioRef.current;
     if (audio && audio.currentTime > 3) {
@@ -161,9 +199,9 @@ export default function MusicPage() {
       return;
     }
     setIndex((i) => (i - 1 + allSongs.length) % allSongs.length);
-  };
+  }, [allSongs.length]);
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
@@ -172,17 +210,17 @@ export default function MusicPage() {
       audio.pause();
       setIsPlaying(false);
     }
-  };
+  }, []);
 
-  const playSong = (i: number) => {
+  const playSong = useCallback((i: number) => {
     if (i === index) togglePlay();
     else setIndex(i);
-  };
+  }, [index, togglePlay]);
 
   const playlists = useMemo(() => {
     const map = new Map<string, { name: string; cover: string; ids: string[] }>();
     allSongs.forEach((s) => {
-      const albumName = s.album || "未分类";
+      const albumName = s.album || "未分类"; // 🔧 修复1: 乱码修正
       if (!map.has(albumName)) {
         map.set(albumName, { name: albumName, cover: s.cover, ids: [] });
       }
@@ -191,40 +229,47 @@ export default function MusicPage() {
     return Array.from(map.values());
   }, [allSongs]);
 
-  const playPlaylist = (ids: string[]) => {
+  // 🔧 修复8: 播放歌单时跳转到第一首
+  const playPlaylist = useCallback((ids: string[]) => {
+    if (!ids.length) return;
     const firstIdx = allSongs.findIndex((s) => s.id === ids[0]);
     if (firstIdx >= 0) setIndex(firstIdx);
-  };
+  }, [allSongs]);
 
-  const onEnded = () => {
+  // 🔧 修复7: onEnded 添加错误处理
+  const onEnded = useCallback(() => {
     if (repeat) {
       const audio = audioRef.current;
       if (audio) {
         audio.currentTime = 0;
-        audio.play().catch(() => {});
+        audio.play().catch(() => setIsPlaying(false));
       }
     } else {
       next();
     }
-  };
+  }, [repeat, next]);
 
-  const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 🔧 修复10: seek 添加 readyState 检查
+  const seek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const audio = audioRef.current;
     const t = Number(e.target.value);
     setCurrentTime(t);
-    if (audio) audio.currentTime = t;
-  };
+    if (audio && audio.readyState >= 1) {
+      audio.currentTime = t;
+    }
+  }, []);
 
-  const seekToLyric = (time: number) => {
+  const seekToLyric = useCallback((time: number) => {
     const audio = audioRef.current;
-    if (audio) {
+    if (audio && audio.readyState >= 1) {
       audio.currentTime = time;
       setCurrentTime(time);
       // 点击跳转后立即恢复自动滚动
       isUserScrolling.current = false;
     }
-  };
+  }, []);
 
+  // ——— 加载状态 ———
   if (dataLoading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-24 flex items-center justify-center">
@@ -234,7 +279,6 @@ export default function MusicPage() {
   }
 
   if (!current) return null;
-
   const hasLyrics = lyrics.length > 0;
 
   return (
@@ -254,17 +298,18 @@ export default function MusicPage() {
       <SectionTitle title="音乐" subtitle="代码与旋律，都是生活的节拍 🎶" />
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* ===== 左栏：播放器 + 歌词一体化 ===== */}
+        {/* ===== 左栏：播放器 + 歌词 ===== */}
         <div className="lg:col-span-1 space-y-6">
           <GlassCard className="sticky top-24 overflow-hidden">
-            {/* 旋转封面 */}
-            <motion.div
-              animate={isPlaying ? { rotate: 360 } : {}}
-              transition={isPlaying ? { repeat: Infinity, duration: 8, ease: "linear" } : {}}
-              className="w-44 h-44 mx-auto rounded-full overflow-hidden mb-5 shadow-xl shadow-indigo-500/20 ring-4 ring-indigo-200 dark:ring-indigo-800"
+            {/* 🔧 修复12: 旋转封面 - 使用 CSS animation 替代 framer-motion 避免暂停跳帧 */}
+            <div
+              className={`w-44 h-44 mx-auto rounded-full overflow-hidden mb-5 shadow-xl shadow-indigo-500/20 ring-4 ring-indigo-200 dark:ring-indigo-800 ${
+                isPlaying ? "animate-spin" : ""
+              }`}
+              style={{ animationDuration: "8s" }}
             >
               <img src={current.cover} alt="Album" className="w-full h-full object-cover" />
-            </motion.div>
+            </div>
 
             <h3 className="font-bold text-lg text-center">{current.title}</h3>
             <p className="text-sm text-gray-500 mb-5 text-center">
@@ -278,8 +323,13 @@ export default function MusicPage() {
             {/* 进度条 */}
             <div className="mb-4 px-2">
               <input
-                type="range" min={0} max={duration || 0} step={0.1} value={currentTime}
-                onChange={seek} className="w-full accent-indigo-500 h-1.5 cursor-pointer"
+                type="range"
+                min={0}
+                max={duration || 0}
+                step={0.1}
+                value={currentTime}
+                onChange={seek}
+                className="w-full accent-indigo-500 h-1.5 cursor-pointer"
               />
               <div className="flex justify-between text-xs text-gray-400 mt-1">
                 <span>{fmt(currentTime)}</span>
@@ -289,21 +339,34 @@ export default function MusicPage() {
 
             {/* 控制按钮 */}
             <div className="flex items-center justify-center gap-4 mb-4">
-              <button onClick={() => setShuffle((s) => !s)}
+              <button
+                onClick={() => setShuffle((s) => !s)}
                 className={`transition-colors ${shuffle ? "text-indigo-500" : "text-gray-400 hover:text-indigo-500"}`}
-                title="随机播放"><Shuffle size={16} /></button>
+                title="随机播放"
+              >
+                <Shuffle size={16} />
+              </button>
               <button onClick={prev} className="text-gray-400 hover:text-indigo-500 transition-colors" title="上一首">
-                <SkipBack size={20} /></button>
-              <motion.button whileTap={{ scale: 0.9 }} onClick={togglePlay}
+                <SkipBack size={20} />
+              </button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={togglePlay}
                 className="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30"
-                title={isPlaying ? "暂停" : "播放"}>
+                title={isPlaying ? "暂停" : "播放"}
+              >
                 {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
               </motion.button>
               <button onClick={next} className="text-gray-400 hover:text-indigo-500 transition-colors" title="下一首">
-                <SkipForward size={20} /></button>
-              <button onClick={() => setRepeat((r) => !r)}
+                <SkipForward size={20} />
+              </button>
+              <button
+                onClick={() => setRepeat((r) => !r)}
                 className={`transition-colors ${repeat ? "text-indigo-500" : "text-gray-400 hover:text-indigo-500"}`}
-                title="单曲循环"><Repeat size={16} /></button>
+                title="单曲循环"
+              >
+                <Repeat size={16} />
+              </button>
             </div>
 
             {/* 音量 */}
@@ -311,12 +374,18 @@ export default function MusicPage() {
               <button onClick={() => setMuted((m) => !m)} className="text-gray-400 hover:text-indigo-500 shrink-0">
                 {muted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
               </button>
-              <input type="range" min={0} max={1} step={0.01} value={muted ? 0 : volume}
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={muted ? 0 : volume}
                 onChange={(e) => { setMuted(false); setVolume(Number(e.target.value)); }}
-                className="flex-1 accent-indigo-500 h-1 cursor-pointer" />
+                className="flex-1 accent-indigo-500 h-1 cursor-pointer"
+              />
             </div>
 
-            {/* 歌词切换 */}
+            {/* 歌词切换按钮 */}
             {hasLyrics && (
               <button
                 onClick={() => setShowLyrics((v) => !v)}
@@ -329,7 +398,7 @@ export default function MusicPage() {
               </button>
             )}
 
-            {/* 🔧 修复5: 歌词面板内嵌到播放器卡片中，不再割裂 */}
+            {/* 歌词面板 */}
             <AnimatePresence>
               {showLyrics && hasLyrics && (
                 <motion.div
@@ -340,22 +409,21 @@ export default function MusicPage() {
                   className="overflow-hidden"
                 >
                   <div className="border-t border-gray-200/50 dark:border-gray-700/50 mt-2">
-                    {/* 歌词头部 */}
                     <div className="px-4 py-2.5 flex items-center gap-2">
                       <Mic2 size={13} className="text-indigo-500" />
                       <span className="text-xs font-medium text-gray-600 dark:text-gray-300">歌词</span>
                       <span className="text-[10px] text-gray-400 ml-auto">{lyrics.length} 行</span>
                     </div>
-
-                    {/* 歌词滚动区域 */}
                     <div
                       ref={lyricContainerRef}
                       className="relative max-h-56 overflow-y-auto px-6 py-2"
-                      style={{ scrollbarWidth: "thin", maskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)" }}
+                      style={{
+                        scrollbarWidth: "thin",
+                        maskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
+                        WebkitMaskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
+                      }}
                     >
-                      {/* 顶部留白 */}
                       <div className="h-16 shrink-0" />
-
                       {lyrics.map((line, i) => {
                         const isActive = i === activeLyricIndex;
                         return (
@@ -375,8 +443,6 @@ export default function MusicPage() {
                           </p>
                         );
                       })}
-
-                      {/* 底部留白 */}
                       <div className="h-16 shrink-0" />
                     </div>
                   </div>
@@ -384,7 +450,7 @@ export default function MusicPage() {
               )}
             </AnimatePresence>
 
-            {/* 无歌词提示（也内嵌在卡片中） */}
+            {/* 无歌词提示 */}
             {!hasLyrics && !dataLoading && (
               <div className="border-t border-gray-200/50 dark:border-gray-700/50 mt-2 py-6 text-center">
                 <div className="text-2xl mb-2 opacity-60">🎵</div>
@@ -408,7 +474,7 @@ export default function MusicPage() {
                 <img src={pl.cover} alt={pl.name} className="w-14 h-14 rounded-xl object-cover" />
                 <div>
                   <h4 className="font-medium text-sm">{pl.name}</h4>
-                  <p className="text-xs text-gray-400">{pl.ids.length} 首歌曲 · 点击播放</p>
+                  <p className="text-xs text-gray-400">{pl.ids.length} 首歌 · 点击播放</p>
                 </div>
               </GlassCard>
             ))}
@@ -438,7 +504,12 @@ export default function MusicPage() {
                   >
                     <span className="text-xs text-gray-400 w-5 text-center">
                       {active && isPlaying ? (
-                        <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ repeat: Infinity, duration: 1.2 }}>♪</motion.span>
+                        <motion.span
+                          animate={{ opacity: [1, 0.3, 1] }}
+                          transition={{ repeat: Infinity, duration: 1.2 }}
+                        >
+                          ▶
+                        </motion.span>
                       ) : (
                         i + 1
                       )}
@@ -448,7 +519,9 @@ export default function MusicPage() {
                       <p className={`text-sm font-medium truncate flex items-center gap-1.5 ${active ? "text-indigo-500" : ""}`}>
                         {song.title}
                         {songHasLyrics && (
-                          <span className="text-[10px] px-1 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-500 font-normal">词</span>
+                          <span className="text-[10px] px-1 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-500 font-normal">
+                            词
+                          </span>
                         )}
                       </p>
                       <p className="text-xs text-gray-400">{song.artist}</p>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
+import { useT } from "@/hooks/useT";
 import { Play, Clock, Eye, ThumbsUp, X, ExternalLink } from "lucide-react";
 
 /* ────────────────────────────────────────────
@@ -138,6 +139,7 @@ const platformBadgeColor: Record<string, string> = {
    页面组件
    ──────────────────────────────────────────── */
 export default function VideoPage() {
+  const { tr } = useT();
   const [activeCategory, setActiveCategory] = useState("全部");
   const [playingVideo, setPlayingVideo] = useState<Video | null>(null);
 
@@ -183,7 +185,7 @@ export default function VideoPage() {
                 : "glass hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
             }`}
           >
-            {cat}
+            {tr(cat)}
           </button>
         ))}
       </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
+import { useT } from "@/hooks/useT";
 import { ExternalLink, Heart, Globe, Plus } from "lucide-react";
 
 const friends = [
@@ -52,11 +53,12 @@ const friends = [
 ];
 
 export default function FriendsPage() {
+  const { tr } = useT();
   const [showApply, setShowApply] = useState(false);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-24">
-      <SectionTitle title="友情链接" subtitle="互联网上的好朋友们 🤝" />
+      <SectionTitle title={tr("友情链接")} subtitle={tr("互联网上的好朋友们 🤝")} />
 
       {/* Friends Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -87,7 +89,7 @@ export default function FriendsPage() {
               <div className="flex gap-1.5 mt-2">
                 {friend.tags.map((tag) => (
                   <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                    {tag}
+                    {tr(tag)}
                   </span>
                 ))}
               </div>
@@ -99,17 +101,17 @@ export default function FriendsPage() {
       {/* Apply Section */}
       <GlassCard className="text-center">
         <h3 className="font-semibold text-lg mb-2 flex items-center justify-center gap-2">
-          <Heart size={18} className="text-red-400" /> 申请友链
+          <Heart size={18} className="text-red-400" /> {tr("申请友链")}
         </h3>
         <p className="text-sm text-gray-500 mb-6">
-          如果你也有一个有趣的博客，欢迎交换友链！
+          {tr("如果你也有一个有趣的博客，欢迎交换友链！")}
         </p>
         {!showApply ? (
           <button
             onClick={() => setShowApply(true)}
             className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-indigo-500/30 transition-all hover:-translate-y-0.5 inline-flex items-center gap-2"
           >
-            <Plus size={16} /> 申请添加
+            <Plus size={16} /> {tr("申请添加")}
           </button>
         ) : (
           <motion.form
@@ -117,11 +119,11 @@ export default function FriendsPage() {
             animate={{ opacity: 1, height: "auto" }}
             className="max-w-md mx-auto space-y-3 text-left"
           >
-            <input placeholder="你的昵称" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-indigo-500/50" />
-            <input placeholder="博客地址" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-indigo-500/50" />
-            <input placeholder="一句话介绍" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-indigo-500/50" />
+            <input placeholder={tr("用户昵称")} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-indigo-500/50" />
+            <input placeholder={tr("博客地址")} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-indigo-500/50" />
+            <input placeholder={tr("一句话介绍")} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-indigo-500/50" />
             <button className="w-full py-3 bg-indigo-500 text-white rounded-xl font-medium hover:bg-indigo-600 transition-colors">
-              提交申请
+              {tr("提交申请")}
             </button>
           </motion.form>
         )}

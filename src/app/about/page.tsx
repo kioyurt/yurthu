@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
+import { useT } from "@/hooks/useT";
 import {
   MapPin, Mail, Globe,
   CodeXml, Palette, Camera, Music, Coffee, BookOpen
@@ -35,9 +36,11 @@ const timeline = [
 ];
 
 export default function AboutPage() {
+  const { tr } = useT();
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-24">
-      <SectionTitle title="关于我" subtitle="一个热爱创造的开发者" />
+      <SectionTitle title={tr("关于我")} subtitle={tr("一个热爱创造的开发者")} />
 
       {/* Profile Card */}
       <GlassCard className="mb-10 text-center py-10">
@@ -52,11 +55,10 @@ export default function AboutPage() {
         <h2 className="text-2xl font-bold mb-1">kioyurt</h2>
         <p className="text-indigo-500 font-medium mb-3">AI Researcher and a student</p>
         <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-          热爱技术，喜欢用代码创造美好的事物。相信开源的力量，
-          享受学习和分享的过程。白天写代码，晚上看星星。✨
+          {tr("热爱技术，喜欢用代码创造美好的事物。相信开源的力量，享受学习和分享的过程。白天写代码，晚上看星星。✨")}
         </p>
         <div className="flex items-center justify-center gap-3 text-sm text-gray-400 mb-6">
-          <span className="flex items-center gap-1"><MapPin size={14} /> 中国 · 陕西</span>
+          <span className="flex items-center gap-1"><MapPin size={14} /> {tr("中国 · 陕西")}</span>
           <span className="flex items-center gap-1"><Mail size={14} /> 456456780qwe@gmail.com</span>
         </div>
         <div className="flex justify-center gap-4">
@@ -70,7 +72,7 @@ export default function AboutPage() {
 
       {/* Skills */}
       <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-        <span className="w-1.5 h-6 bg-indigo-500 rounded-full" /> 技能
+        <span className="w-1.5 h-6 bg-indigo-500 rounded-full" /> {tr("技能")}
       </h3>
       <GlassCard className="mb-10 space-y-5">
         {skills.map((skill, i) => (
@@ -94,7 +96,7 @@ export default function AboutPage() {
 
       {/* Hobbies */}
       <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-        <span className="w-1.5 h-6 bg-purple-500 rounded-full" /> 兴趣爱好
+        <span className="w-1.5 h-6 bg-purple-500 rounded-full" /> {tr("兴趣爱好")}
       </h3>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mb-10">
         {hobbies.map((hobby, i) => (
@@ -108,20 +110,20 @@ export default function AboutPage() {
             className="glass p-4 text-center"
           >
             <hobby.icon className="mx-auto mb-2 text-indigo-500" size={24} />
-            <span className="text-xs font-medium">{hobby.label}</span>
+            <span className="text-xs font-medium">{tr(hobby.label)}</span>
           </motion.div>
         ))}
       </div>
 
       {/* Timeline */}
       <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-        <span className="w-1.5 h-6 bg-pink-500 rounded-full" /> 经历
+        <span className="w-1.5 h-6 bg-pink-500 rounded-full" /> {tr("经历")}
       </h3>
       <div className="relative pl-6">
         <div className="absolute left-1 top-2 bottom-2 w-0.5 bg-gradient-to-b from-indigo-500 to-pink-500" />
         {timeline.map((item, i) => (
           <motion.div
-            key={item.period}
+            key={`${item.period}-${i}`}
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}

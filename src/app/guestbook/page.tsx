@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
+import { useT } from "@/hooks/useT";
 import { Send, Heart, Reply, Sparkles } from "lucide-react";
 
 const initialMessages = [
@@ -39,6 +40,7 @@ const initialMessages = [
 ];
 
 export default function GuestbookPage() {
+  const { tr } = useT();
   const [messages, setMessages] = useState(initialMessages);
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
@@ -70,7 +72,7 @@ export default function GuestbookPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-24">
-      <SectionTitle title="留言板" subtitle="在这里留下你的足迹 💫" />
+      <SectionTitle title={tr("留言板")} subtitle={tr("在这里留下你的足迹 💫")} />
 
       {/* Submit Form */}
       <GlassCard className="mb-10">
@@ -78,14 +80,14 @@ export default function GuestbookPage() {
           <div className="flex gap-4">
             <input
               type="text"
-              placeholder="你的昵称"
+              placeholder={tr("你的昵称")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="flex-1 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
             />
           </div>
           <textarea
-            placeholder="写点什么吧..."
+            placeholder={tr("写点什么吧...")}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={4}
@@ -93,13 +95,13 @@ export default function GuestbookPage() {
           />
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-400 flex items-center gap-1">
-              <Sparkles size={14} /> 友善交流，互相尊重
+              <Sparkles size={14} /> {tr("友善交流，互相尊重")}
             </span>
             <button
               type="submit"
               className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-indigo-500/30 transition-all hover:-translate-y-0.5 flex items-center gap-2"
             >
-              <Send size={16} /> 发布
+              <Send size={16} /> {tr("发布")}
             </button>
           </div>
         </form>
@@ -141,7 +143,7 @@ export default function GuestbookPage() {
                         {msg.likes}
                       </button>
                       <button className="flex items-center gap-1 text-xs text-gray-400 hover:text-indigo-500 transition-colors">
-                        <Reply size={14} /> 回复
+                        <Reply size={14} /> {tr("回复")}
                       </button>
                     </div>
 

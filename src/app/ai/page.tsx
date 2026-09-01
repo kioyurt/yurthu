@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
+import { useT } from "@/hooks/useT";
 import { Bot, Send, Sparkles, Brain, Search, Zap } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 
@@ -12,16 +13,16 @@ interface Message {
   content: string;
 }
 
-const quickActions = [
-  { icon: Search, label: "搜索文章", prompt: "帮我找关于 React 性能优化的文章" },
-  { icon: Sparkles, label: "生成摘要", prompt: "总结我最近写的3篇文章" },
-  { icon: Brain, label: "技术问答", prompt: "解释一下 React Server Components" },
-  { icon: Zap, label: "代码助手", prompt: "帮我写一个防抖函数" },
-];
-
 export default function AIPage() {
+  const { tr } = useT();
+  const quickActions = [
+    { icon: Search, label: tr("搜索文章"), prompt: "帮我找关于 React 性能优化的文章" },
+    { icon: Sparkles, label: tr("生成摘要"), prompt: "总结我最近写的3篇文章" },
+    { icon: Brain, label: tr("技术问答"), prompt: "解释一下 React Server Components" },
+    { icon: Zap, label: tr("代码助手"), prompt: "帮我写一个防抖函数" },
+  ];
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "你好！我是博客 AI 助手 ✨ 可以帮你搜索文章、回答问题、生成摘要。试试下面的快捷操作，或直接输入你的问题吧！" },
+    { role: "assistant", content: tr("你好！我是博客 AI 助手 ✨ 可以帮你搜索文章、回答问题、生成摘要。试试下面的快捷操作，或直接输入你的问题吧！") },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,7 +46,7 @@ export default function AIPage() {
         ...prev,
         {
           role: "assistant",
-          content: `收到你的问题："${msg}"\n\n这是一个模拟响应。实际部署时，这里会调用你的后端 AI API（如 OpenAI / 本地 LLM）来生成回答。\n\n💡 可以接入：\n• 语义搜索（pgvector）\n• 文章摘要生成\n• 代码解释\n• 智能推荐`,
+          content: tr("收到你的问题：\"{msg}\"\n\n这是一个模拟响应。实际部署时，这里会调用你的后端 AI API（如 OpenAI / 本地 LLM）来生成回答。\n\n💡 可以接入：\n• 语义搜索（pgvector）\n• 文章摘要生成\n• 代码解释\n• 智能推荐", { msg }),
         },
       ]);
       setLoading(false);
@@ -54,7 +55,7 @@ export default function AIPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-24">
-      <SectionTitle title="AI 助手" subtitle="智能对话 · 语义搜索 · 知识问答" />
+      <SectionTitle title={tr("AI 助手")} subtitle={tr("智能对话 · 语义搜索 · 知识问答")} />
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
@@ -135,7 +136,7 @@ export default function AIPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="输入你的问题..."
+              placeholder={tr("输入你的问题...")}
               className="flex-1 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
             />
             <button

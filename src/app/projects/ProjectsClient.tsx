@@ -4,6 +4,7 @@ import { useState } from "react";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
 import { useSettings } from "@/context/SettingsContext";
+import { useT } from "@/hooks/useT";
 import {
   Star, GitFork, GitBranch, ExternalLink, Users, BookOpen,
 } from "lucide-react";
@@ -25,6 +26,7 @@ export default function ProjectsClient({
   repos: GitHubRepo[];
 }) {
   const { settings } = useSettings();
+  const { tr } = useT();
   const [chartFailed, setChartFailed] = useState(false);
   const accent = settings.accentColor.replace("#", ""); // 热力图跟随主题色
 
@@ -40,40 +42,40 @@ export default function ProjectsClient({
   const totalStars = sorted.reduce((s, r) => s + r.stargazers_count, 0);
   const totalForks = sorted.reduce((s, r) => s + r.forks_count, 0);
 
+  const stats = [
+    { label: "仓库", value: user?.public_repos ?? 0, color: "text-indigo-500", icon: BookOpen },
+    { label: "Stars", value: totalStars, color: "text-green-500", icon: Star },
+    { label: "Forks", value: totalForks, color: "text-purple-500", icon: GitFork },
+    { label: "关注者", value: user?.followers ?? 0, color: "text-orange-500", icon: Users },
+  ];
+
   // —— 网络失败兜底 ——
   if (!user) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-24">
-        <SectionTitle title="开源项目" subtitle="在 GitHub 上的代码与贡献" />
+        <SectionTitle title={tr("开源项目")} subtitle={tr("在 GitHub 上的代码与贡献")} />
         <GlassCard className="text-center py-16">
           <GithubIcon size={40} className="mx-auto mb-4 text-gray-400" />
           <p className="text-gray-400 mb-6">
-            GitHub 数据暂时无法加载（网络或 API 限流），请稍后刷新。
+            {tr("GitHub 数据暂时无法加载（网络或 API 限流），请稍后刷新。")}
           </p>
           <a
             href={GITHUB_URL}
             target="_blank"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl accent-bg text-white"
           >
-            <ExternalLink size={16} /> 直接访问 GitHub
+            <ExternalLink size={16} /> {tr("直接访问 GitHub")}
           </a>
         </GlassCard>
       </div>
     );
   }
 
-  const stats = [
-    { label: "仓库", value: user.public_repos, color: "text-indigo-500", icon: BookOpen },
-    { label: "Stars", value: totalStars, color: "text-green-500", icon: Star },
-    { label: "Forks", value: totalForks, color: "text-purple-500", icon: GitFork },
-    { label: "关注者", value: user.followers, color: "text-orange-500", icon: Users },
-  ];
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-24">
       <SectionTitle
-        title="开源项目"
-        subtitle={`@${user.login} · 数据来自 GitHub，每小时自动更新`}
+        title={tr("开源项目")}
+        subtitle={`@${user.login} · ${tr("数据来自 GitHub，每小时自动更新")}`}
       />
 
       {/* 真实用户卡片 */}
@@ -87,7 +89,7 @@ export default function ProjectsClient({
           />
           <div>
             <h3 className="font-bold text-lg">{user.name ?? user.login}</h3>
-            <p className="text-sm text-gray-500">{user.bio ?? "这个人很懒，什么都没写"}</p>
+            <p className="text-sm text-gray-500">{user.bio ?? tr("这个人很懒，什么都没写")}</p>
             <a
               href={user.html_url}
               target="_blank"
@@ -103,7 +105,7 @@ export default function ProjectsClient({
               <div className={`text-2xl font-bold ${s.color}`}>
                 {Number(s.value).toLocaleString()}
               </div>
-              <div className="text-xs text-gray-500">{s.label}</div>
+              <div className="text-xs text-gray-500">{tr(s.label)}</div>
             </div>
           ))}
         </div>
@@ -112,7 +114,7 @@ export default function ProjectsClient({
       {/* 真实仓库列表 */}
       {shown.length === 0 ? (
         <GlassCard className="text-center py-12 text-gray-400">
-          还没有公开仓库，去 GitHub 写第一个项目吧 →
+          {tr("还没有公开仓库，去 GitHub 写第一个项目吧 →")}
         </GlassCard>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -120,7 +122,7 @@ export default function ProjectsClient({
             <GlassCard key={repo.name} delay={i * 0.08} className="relative group flex flex-col">
               {pinnedNames.includes(repo.name) && (
                 <span className="absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                  📌 Pinned
+                  {tr("📌 Pinned")}
                 </span>
               )}
               <a href={repo.html_url} target="_blank" className="mb-3">
@@ -130,7 +132,7 @@ export default function ProjectsClient({
                 </h3>
               </a>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
-                {repo.description ?? "暂无描述"}
+                {repo.description ?? tr("暂无描述")}
               </p>
               {repo.topics?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-4">
@@ -178,7 +180,7 @@ export default function ProjectsClient({
 
       {/* 真实贡献热力图（跟随主题色） */}
       <GlassCard className="mt-10 py-8 text-center">
-        <p className="text-gray-400 text-sm mb-4">📊 年度贡献热力图</p>
+        <p className="text-gray-400 text-sm mb-4">{tr("📊 年度贡献热力图")}</p>
         {!chartFailed ? (
           <img
             src={`https://ghchart.rshah.org/${accent}/${GITHUB_USERNAME}`}
@@ -192,7 +194,7 @@ export default function ProjectsClient({
             target="_blank"
             className="text-sm accent-text hover:underline"
           >
-            热力图加载失败，去 GitHub 查看 →
+            {tr("热力图加载失败，去 GitHub 查看 →")}
           </a>
         )}
       </GlassCard>

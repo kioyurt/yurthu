@@ -4,15 +4,26 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import SectionTitle from "@/components/ui/SectionTitle";
+import { useT } from "@/hooks/useT";
 import { Search, Calendar, Eye, Heart, Tag } from "lucide-react";
 
 const categories = ["全部", "前端", "后端", "AI", "生活", "摄影", "开源"];
+
+const categoryMap: Record<string, string> = {
+  "全部": "全部",
+  "前端": "前端",
+  "后端": "后端",
+  "AI": "AI",
+  "生活": "生活",
+  "摄影": "摄影",
+  "开源": "开源",
+};
 
 const articles = [
   {
     id: 1,
     title: "2026年前端开发趋势：AI 驱动的新范式",
-    summary: "探索 AI 如何改变前端开发流程，从代码生成到智能调试...",
+    summary: "2026年前端开发趋势：AI 驱动的新范式 - summary",
     cover: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop",
     category: "前端",
     tags: ["React", "AI", "2026"],
@@ -84,6 +95,7 @@ const articles = [
 ];
 
 export default function ArticlesPage() {
+  const { tr } = useT();
   const [activeCategory, setActiveCategory] = useState("全部");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -95,7 +107,7 @@ export default function ArticlesPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-24">
-      <SectionTitle title="文章" subtitle="记录技术探索与生活感悟" />
+      <SectionTitle title={tr("文章")} subtitle={tr("记录技术探索与生活感悟")} />
 
       {/* Search & Filter */}
       <div className="mb-8 space-y-4">
@@ -103,7 +115,7 @@ export default function ArticlesPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input
             type="text"
-            placeholder="搜索文章..."
+            placeholder={tr("搜索文章...")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-3 rounded-xl glass outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"

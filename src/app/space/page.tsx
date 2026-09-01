@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import SectionTitle from "@/components/ui/SectionTitle";
 import GlassCard from "@/components/ui/GlassCard";
+import { useT } from "@/hooks/useT";
 import {
   Monitor, Smartphone, Server, Globe,
   Cpu, HardDrive, Wifi, Zap
@@ -54,9 +55,11 @@ const timeline = [
 ];
 
 export default function SpacePage() {
+  const { tr } = useT();
+  
   return (
     <div className="max-w-6xl mx-auto px-4 py-24">
-      <SectionTitle title="数字空间" subtitle="我的设备、服务与数字生活" />
+      <SectionTitle title={tr("数字空间")} subtitle={tr("我的设备、服务与数字生活")} />
 
       {/* Space Cards */}
       <div className="grid md:grid-cols-2 gap-6 mb-16">
@@ -72,18 +75,18 @@ export default function SpacePage() {
               <div className="absolute bottom-4 left-4 right-4">
                 <div className="flex items-center gap-2 text-white">
                   <space.icon size={20} />
-                  <h3 className="font-semibold text-lg">{space.title}</h3>
+                  <h3 className="font-semibold text-lg">{tr(space.title)}</h3>
                 </div>
               </div>
               <div className="absolute top-3 right-3">
                 <span className="px-2 py-1 rounded-full text-xs bg-green-500/90 text-white">
-                  ● {space.status}
+                  ● {tr(space.status)}
                 </span>
               </div>
             </div>
             <div className="p-5">
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                {space.description}
+                {tr(space.description)}
               </p>
               <div className="flex gap-2 flex-wrap">
                 {space.specs.map((spec) => (
@@ -98,7 +101,7 @@ export default function SpacePage() {
       </div>
 
       {/* Timeline */}
-      <h3 className="text-xl font-bold mb-8 text-center">🚀 进化时间线</h3>
+      <h3 className="text-xl font-bold mb-8 text-center">{tr("🚀 进化时间线")}</h3>
       <div className="relative max-w-2xl mx-auto">
         <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-500 to-purple-500 -translate-x-1/2" />
         {timeline.map((item, i) => (
@@ -114,7 +117,7 @@ export default function SpacePage() {
           >
             <div className={`w-5/12 ${i % 2 === 0 ? "text-right pr-8" : "text-left pl-8"}`}>
               <span className="font-mono text-indigo-500 font-bold">{item.year}</span>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{item.event}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{tr(item.event)}</p>
             </div>
             <div className="w-2/12 flex justify-center">
               <div className="w-4 h-4 rounded-full bg-indigo-500 border-4 border-white dark:border-gray-900 shadow-lg" />
