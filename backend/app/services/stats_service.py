@@ -303,3 +303,52 @@ class StatsService:
             current += timedelta(days=1)
 
         return result
+
+    async def get_public_activity(self, days: int = 112) -> List[TrendItem]:
+        """获取公开站点活跃度。Args:
+            days: 统计过去多少天。
+
+        Returns:
+            完整日期序列，每天一个 TrendItem。
+        """
+        if days < 7:
+            days = 7
+
+        if days > 366:
+            days = 366
+
+        end_date = (
+            datetime.now(timezone.utc)
+            .replace(hour=0, minute=0, second=0, microsecond=0)
+            + timedelta(days=1)
+        )
+
+        start_date = end_date - timedelta(days=days)
+
+        views_by_date = await self.view_repo.get_views_by_date_range(
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        stats_map = {
+            date_str: count
+            for date_str, count in views_by_date
+        }
+
+        result: List[TrendItem] = []
+
+        current = start_date
+
+        while current < end_date:
+            date_str = current.strftime("%Y-%m-%d")
+
+            result.append(
+                TrendItem(
+                    date=date_str,
+                    count=stats_map.get(date_str, 0),
+                )
+            )
+
+            current += timedelta(days=1)
+
+        return result
