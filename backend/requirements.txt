@@ -1,27 +1,35 @@
-alembic==1.19.1
-annotated-doc==0.0.5
-annotated-types==0.8.0
-anyio==4.14.2
-asyncpg==0.31.0
-click==8.4.2
-colorama==0.4.6
-fastapi==0.141.1
-greenlet==3.5.5
-h11==0.16.0
-httptools==0.8.0
-idna==3.18
-Mako==1.4.1
-MarkupSafe==3.0.3
-psycopg2-binary==2.9.12
-pydantic==2.13.4
-pydantic-settings==2.15.0
-pydantic_core==2.46.4
-python-dotenv==1.2.2
-PyYAML==6.0.3
-SQLAlchemy==2.0.51
-starlette==1.6.0
-typing-inspection==0.4.3
-typing_extensions==4.16.0
-uvicorn==0.52.1
-watchfiles==1.2.0
-websockets==17.0.1
+# Web 框架
+fastapi==0.141.0
+uvicorn[standard]==0.30.6
+
+# 数据库
+sqlalchemy[asyncio]==2.0.35
+asyncpg==0.30.0
+alembic==1.13.2
+
+# 配置管理
+pydantic-settings==2.5.2
+
+# 认证与安全
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# HTTP 客户端（GitHub OAuth）
+httpx==0.27.2
+
+# 文件上传处理
+python-multipart==0.0.9
+
+# 图片处理
+pillow==10.4.0
+
+# 邮箱校验（Pydantic EmailStr 依赖）
+email-validator==2.2.0
+
+# 测试
+pytest==8.3.2
+pytest-asyncio==0.24.0
+aiosqlite==0.20.0
+
+# 工具库
+python-slugify==8.0.4
