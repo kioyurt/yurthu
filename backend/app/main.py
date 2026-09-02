@@ -28,6 +28,7 @@ from .routers import (
     categories as categories_router,
     comments as comments_router,
     guestbook as guestbook_router,
+    media as media_router,
     posts as posts_router,
     stats as stats_router,
 )
@@ -186,7 +187,9 @@ def _build_app(
     app.include_router(categories_router.router)
     app.include_router(comments_router.router)
     app.include_router(guestbook_router.router)
+    app.include_router(media_router.router)
     app.include_router(stats_router.router)
+
     app.include_router(admin_posts_router.router)
     app.include_router(admin_categories_router.router)
     app.include_router(admin_comments_router.router)

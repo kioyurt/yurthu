@@ -1,20 +1,24 @@
 // src/hooks/useRealTimeStats.ts
-import { useState, useEffect, useCallback } from "react";
 
-interface StatItem {
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import {
+  getActivityStats,
+  getPosts,
+  getStatsOverview,
+  type ActivityItem,
+  type StatsOverview,
+} from "@/lib/api";
+
+export interface StatItem {
   label: string;
   value: number;
   icon: string;
   href: string;
-  trend?: number; // 相比上周的增长
 }
 
-interface ActivityData {
-  date: string;
-  count: number;
-}
-
-interface TimelineItem {
+export interface TimelineItem {
   id: string;
   type: "article" | "code" | "photo" | "music";
   title: string;
@@ -22,56 +26,137 @@ interface TimelineItem {
   href: string;
 }
 
-export function useRealTimeStats() {
-  const [stats, setStats] = useState<StatItem[]>([]);
-  const [activity, setActivity] = useState<ActivityData[]>([]);
+interface UseRealTimeStatsOptions {
+  refreshInterval?: number;
+}
+
+interface UseRealTimeStatsResult {
+  stats: StatItem[];
+  activity: ActivityItem[];
+  timeline: TimelineItem[];
+  latestPosts: Awaited<ReturnType<typeof getPosts>>["items"];
+  overview: StatsOverview | null;
+  loading: boolean;
+  refreshing: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+}
+
+export function useRealTimeStats(
+  options: UseRealTimeStatsOptions = {},
+): UseRealTimeStatsResult {
+  const refreshInterval = options.refreshInterval ?? 60_000;
+
+  const [overview, setOverview] = useState<StatsOverview | null>(null);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [timeline, setTimeline] = useState<TimelineItem[]>([]);
+  const [latestPosts, setLatestPosts] = useState<
+    Awaited<ReturnType<typeof getPosts>>["items"]
+  >([]);
+
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = useCallback(async () => {
+  const buildStats = useCallback(
+    (data: StatsOverview): StatItem[] => [
+      {
+        label: "文章",
+        value: data.total_posts,
+        icon: "FileText",
+        href: "/articles",
+      },
+      {
+        label: "媒体",
+        value: data.total_media,
+        icon: "Camera",
+        href: "/gallery",
+      },
+      {
+        label: "阅读",
+        value: data.total_views,
+        icon: "Eye",
+        href: "/articles",
+      },
+      {
+        label: "留言",
+        value: data.total_guestbook,
+        icon: "MessageCircle",
+        href: "/guestbook",
+      },
+    ],
+    [],
+  );
+
+  const refresh = useCallback(async () => {
+    setRefreshing(true);
+    setError(null);
+
     try {
-      // 🔧 实际项目中替换为真实 API
-      // const res = await fetch("/api/stats");
-      // const data = await res.json();
+      const [overviewData, activityData, latestPostData] =
+        await Promise.all([
+          getStatsOverview(),
+          getActivityStats({ days: 112 }),
+          getPosts({
+            page: 1,
+            pageSize: 5,
+          }),
+        ]);
 
-      // 模拟数据（替换为真实接口）
-      await new Promise((r) => setTimeout(r, 600));
+      setOverview(overviewData);
+      setActivity(activityData);
+      setLatestPosts(latestPostData.items);
 
-      setStats([
-        { label: "文章", value: 128, icon: "FileText", href: "/articles", trend: 3 },
-        { label: "照片", value: 256, icon: "Camera", href: "/gallery", trend: 12 },
-        { label: "音乐", value: 64, icon: "Music", href: "/music", trend: 2 },
-        { label: "开源项目", value: 32, icon: "Github", href: "/projects", trend: 1 },
-      ]);
+      const generatedTimeline: TimelineItem[] = latestPostData.items.map(
+        (post) => ({
+          id: String(post.id),
+          type: "article",
+          title: post.title,
+          date: post.published_at || post.created_at,
+          href: `/articles/${post.slug}`,
+        }),
+      );
 
-      // 生成过去 16 周的热力图数据
-      const actData: ActivityData[] = [];
-      const now = new Date();
-      for (let i = 111; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        actData.push({
-          date: d.toISOString().split("T")[0],
-          count: Math.floor(Math.random() * 8),
-        });
-      }
-      setActivity(actData);
+      setTimeline(generatedTimeline);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "加载站点统计失败";
 
-      setTimeline([
-        { id: "1", type: "article", title: "2026年前端趋势：AI驱动开发", date: "2026-08-01", href: "/articles/1" },
-        { id: "2", type: "code", title: "blog-engine v2.3.0 发布", date: "2026-07-30", href: "/projects/blog-engine" },
-        { id: "3", type: "photo", title: "周末骑行 · 城市夜景", date: "2026-07-28", href: "/gallery/ride" },
-        { id: "4", type: "music", title: "新增 3 首歌曲到「深夜编程」歌单", date: "2026-07-27", href: "/music" },
-        { id: "5", type: "article", title: "用 Rust 重写我的博客引擎", date: "2026-07-25", href: "/articles/2" },
-      ]);
+      setError(message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+    let cancelled = false;
 
-  return { stats, activity, timeline, loading };
+    void refresh();
+
+    const timer = window.setInterval(() => {
+      if (!cancelled) {
+        void refresh();
+      }
+    }, refreshInterval);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [refresh, refreshInterval]);
+
+  const stats = overview ? buildStats(overview) : [];
+
+  return {
+    stats,
+    activity,
+    timeline,
+    latestPosts,
+    overview,
+    loading,
+    refreshing,
+    error,
+    refresh,
+  };
 }

@@ -54,40 +54,57 @@ class MediaRepository:
         uploader_id: Optional[int] = None,
         mime_type_prefix: Optional[str] = None,
     ) -> Tuple[List[Media], int]:
-        """分页查询媒体列表。
+        """分页查询媒体列表。"""
 
-        Args:
-            page: 页码。
-            page_size: 每页数量。
-            uploader_id: 上传者 ID 筛选。
-            mime_type_prefix: MIME 类型前缀筛选（如 "image/"）。
-
-        Returns:
-            (媒体列表, 总数)。
-        """
         query = select(Media)
         count_query = select(func.count(Media.id))
 
-        if uploader_id:
-            query = query.where(Media.uploader_id == uploader_id)
-            count_query = count_query.where(Media.uploader_id == uploader_id)
-
-        if mime_type_prefix:
-            query = query.where(Media.mime_type.startswith(mime_type_prefix))
-            count_query = count_query.where(
-                Media.mime_type.startswith(mime_type_prefix)
+        if uploader_id is not None:
+            query = query.where(
+                Media.uploader_id == uploader_id
             )
 
-        query = query.order_by(desc(Media.created_at))
+            count_query = count_query.where(
+                Media.uploader_id == uploader_id
+            )
 
-        offset = (page - 1) * page_size
-        query = query.offset(offset).limit(page_size)
+        if mime_type_prefix:
+            normalized_prefix = (
+                mime_type_prefix.strip()
+            )
+
+            query = query.where(
+                Media.mime_type.startswith(
+                    normalized_prefix
+                )
+            )
+
+            count_query = count_query.where(
+                Media.mime_type.startswith(
+                    normalized_prefix
+                )
+            )
+
+        query = (
+            query
+            .order_by(desc(Media.created_at))
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
 
         result = await self.db.execute(query)
-        items = list(result.scalars().all())
 
-        count_result = await self.db.execute(count_query)
-        total = count_result.scalar_one()
+        items = list(
+            result.scalars().all()
+        )
+
+        count_result = await self.db.execute(
+            count_query
+        )
+
+        total = int(
+            count_result.scalar_one()
+        )
 
         return items, total
 

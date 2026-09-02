@@ -1,204 +1,395 @@
 // src/app/articles/page.tsx
+
 "use client";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  MessageCircle,
+  Search,
+} from "lucide-react";
+
 import GlassCard from "@/components/ui/GlassCard";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { useT } from "@/hooks/useT";
-import { Search, Calendar, Eye, Heart } from "lucide-react";
 
-const categories = ["全部", "前端", "后端", "AI", "生活", "摄影", "开源"];
+import {
+  getCategories,
+  getPosts,
+  type Category,
+  type PostListItem,
+} from "@/lib/api";
 
-const articles = [
-  {
-    id: 1,
-    title: "2026年前端开发趋势：AI 驱动的新范式",
-    summary: "探索 AI 如何改变前端开发流程，从代码生成到智能调试...",
-    cover: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop",
-    category: "前端",
-    tags: ["React", "AI", "2026"],
-    date: "2026-08-01",
-    views: 1234,
-    likes: 89,
-    readTime: "8 min",
-  },
-  {
-    id: 2,
-    title: "从零搭建 Rust + WebAssembly 高性能服务",
-    summary: "使用 Rust 编写核心逻辑，编译为 WASM 在浏览器中运行...",
-    cover: "https://images.unsplash.com/photo-1515879218367-8466d910auj7?w=600&h=400&fit=crop",
-    category: "后端",
-    tags: ["Rust", "WASM", "性能"],
-    date: "2026-07-28",
-    views: 856,
-    likes: 67,
-    readTime: "12 min",
-  },
-  {
-    id: 3,
-    title: "我的 AI 绘画工作流分享",
-    summary: "从 Stable Diffusion 到 ComfyUI，打造个人创作管线...",
-    cover: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=400&fit=crop",
-    category: "AI",
-    tags: ["Stable Diffusion", "创作"],
-    date: "2026-07-20",
-    views: 2341,
-    likes: 156,
-    readTime: "6 min",
-  },
-  {
-    id: 4,
-    title: "京都赏枫摄影手记",
-    summary: "十一月的京都，红叶如火。用镜头记录这座古都的秋色...",
-    cover: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=600&h=400&fit=crop",
-    category: "摄影",
-    tags: ["旅行", "日本", "风光"],
-    date: "2026-07-15",
-    views: 3102,
-    likes: 234,
-    readTime: "5 min",
-  },
-  {
-    id: 5,
-    title: "HomeLab 2026：我的家庭服务器集群",
-    summary: "从单台 N100 到 3 节点 K8s 集群的进化之路...",
-    cover: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=400&fit=crop",
-    category: "后端",
-    tags: ["HomeLab", "K8s", "运维"],
-    date: "2026-07-10",
-    views: 1876,
-    likes: 145,
-    readTime: "15 min",
-  },
-  {
-    id: 6,
-    title: "开源一年：我的 GitHub 成长记录",
-    summary: "从第一个 PR 到维护 3 个千星项目的心路历程...",
-    cover: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=600&h=400&fit=crop",
-    category: "开源",
-    tags: ["GitHub", "开源", "成长"],
-    date: "2026-07-05",
-    views: 2890,
-    likes: 312,
-    readTime: "10 min",
-  },
-];
+const PAGE_SIZE = 12;
+
+function formatDate(value: string | null): string {
+  if (!value) {
+    return "--";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value.slice(0, 10);
+  }
+
+  return date.toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+function getCoverImage(post: PostListItem): string | null {
+  return post.cover_image?.trim() || null;
+}
 
 export default function ArticlesPage() {
   const { tr } = useT();
-  const [activeCategory, setActiveCategory] = useState("全部");
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [posts, setPosts] = useState<PostListItem[]>([]);
+
+  const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = articles.filter((a) => {
-    const matchCat = activeCategory === "全部" || a.category === activeCategory;
-    const matchSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [total, setTotal] = useState(0);
+
+  const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadCategories = useCallback(async () => {
+    setCategoriesLoading(true);
+
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch {
+      setCategories([]);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  }, []);
+
+  const loadPosts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await getPosts({
+        page,
+        pageSize: PAGE_SIZE,
+        category: activeCategory || undefined,
+        search: searchQuery.trim() || undefined,
+      });
+
+      setPosts(response.items);
+      setTotalPages(response.total_pages);
+      setTotal(response.total);
+    } catch (err) {
+      setPosts([]);
+      setTotalPages(0);
+      setTotal(0);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "文章加载失败",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [activeCategory, page, searchQuery]);
+
+  useEffect(() => {
+    void loadCategories();
+  }, [loadCategories]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadPosts();
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [loadPosts]);
+
+  const changeCategory = (slug: string) => {
+    setActiveCategory(slug);
+    setPage(1);
+  };
+
+  const changeSearchQuery = (value: string) => {
+    setSearchQuery(value);
+    setPage(1);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-24">
-      <SectionTitle title={tr("文章")} subtitle={tr("记录技术探索与生活感悟")} />
+      <SectionTitle
+        title={tr("文章")}
+        subtitle={tr("记录技术探索与生活感悟")}
+      />
 
-      {/* Search & Filter */}
-      <div className="mb-8 space-y-4">
-        <div className="relative max-w-md mx-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+      <div className="mb-10 space-y-5">
+        <div className="relative max-w-xl mx-auto">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            size={18}
+          />
+
           <input
-            type="text"
-            placeholder={tr("搜索文章...")}
+            type="search"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(event) =>
+              changeSearchQuery(event.target.value)
+            }
+            placeholder={tr("搜索文章...")}
             className="w-full pl-10 pr-4 py-3 rounded-xl glass outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
           />
         </div>
+
         <div className="flex gap-2 justify-center flex-wrap">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                activeCategory === cat
-                  ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/30"
-                  : "glass hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
-              }`}
-            >
-              {tr(cat)}
-            </button>
-          ))}
+          <button
+            type="button"
+            onClick={() => changeCategory("")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              activeCategory === ""
+                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/30"
+                : "glass hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
+            }`}
+          >
+            {tr("全部")}
+          </button>
+
+          {categoriesLoading ? (
+            <div className="flex gap-2">
+              {[1, 2, 3].map((item) => (
+                <div
+                  key={item}
+                  className="w-20 h-9 rounded-full bg-gray-100 dark:bg-gray-800 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            categories.map((category) => (
+              <button
+                type="button"
+                key={category.id}
+                onClick={() => changeCategory(category.slug)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  activeCategory === category.slug
+                    ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/30"
+                    : "glass hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
+                }`}
+              >
+                {tr(category.name)}
+              </button>
+            ))
+          )}
+        </div>
+
+        <div className="text-center text-xs text-gray-400">
+          {total} {tr("篇文章")}
         </div>
       </div>
 
-      {/* Article Grid */}
-      <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <AnimatePresence mode="popLayout">
-          {filtered.map((article, i) => (
-            <motion.div
-              key={article.id}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ delay: i * 0.05 }}
+      {error ? (
+        <GlassCard className="mb-8">
+          <div className="py-10 text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+
+            <button
+              type="button"
+              onClick={() => void loadPosts()}
+              className="px-5 py-2 rounded-xl bg-indigo-500 text-white hover:bg-indigo-600 transition-colors"
             >
-              <GlassCard className="h-full overflow-hidden !p-0 group cursor-pointer">
-                {/* Cover */}
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={article.cover}
-                    alt={tr(article.title)}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 left-3">
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
-                      {tr(article.category)}
-                    </span>
-                  </div>
-                </div>
+              {tr("重新加载")}
+            </button>
+          </div>
+        </GlassCard>
+      ) : null}
 
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-indigo-500 transition-colors">
-                    {tr(article.title)}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
-                    {tr(article.summary)}
-                  </p>
-
-                  {/* Tags */}
-                  <div className="flex gap-2 flex-wrap mb-4">
-                    {article.tags.map((tag) => (
-                      <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                        #{tr(tag)}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Meta */}
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Calendar size={12} /> {article.date}
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1">
-                        <Eye size={12} /> {article.views}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Heart size={12} /> {article.likes}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </GlassCard>
-            </motion.div>
+      {loading ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-[420px] rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse"
+            />
           ))}
-        </AnimatePresence>
-      </motion.div>
-
-      {filtered.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-4xl mb-4">🔍</p>
-          <p>{tr("没有找到相关文章")}</p>
         </div>
+      ) : (
+        <>
+          <motion.div
+            layout
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <AnimatePresence mode="popLayout">
+              {posts.map((post, index) => {
+                const cover = getCoverImage(post);
+
+                return (
+                  <motion.div
+                    key={post.id}
+                    layout
+                    initial={{
+                      opacity: 0,
+                      scale: 0.96,
+                      y: 12,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      scale: 1,
+                      y: 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.96,
+                    }}
+                    transition={{
+                      delay: Math.min(index * 0.04, 0.2),
+                    }}
+                  >
+                    <Link
+                      href={`/articles/${post.slug}`}
+                      className="block h-full"
+                    >
+                      <GlassCard className="h-full overflow-hidden !p-0 group cursor-pointer">
+                        <div className="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          {cover ? (
+                            <img
+                              src={cover}
+                              alt={tr(post.title)}
+                              loading="lazy"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/20 to-purple-500/20">
+                              <span className="text-4xl font-bold text-indigo-500/40">
+                                {post.title.charAt(0)}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="absolute top-3 left-3 flex gap-2">
+                            {post.category ? (
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
+                                {tr(post.category.name)}
+                              </span>
+                            ) : null}
+
+                            {post.is_pinned ? (
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-500 text-white">
+                                {tr("置顶")}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        <div className="p-5">
+                          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-indigo-500 transition-colors">
+                            {tr(post.title)}
+                          </h3>
+
+                          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 mb-4 min-h-[60px]">
+                            {post.excerpt
+                              ? tr(post.excerpt)
+                              : tr("暂无摘要")}
+                          </p>
+
+                          <div className="flex gap-2 flex-wrap mb-5 min-h-[24px]">
+                            {post.tags.slice(0, 4).map((tag) => (
+                              <span
+                                key={tag.id}
+                                className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                              >
+                                #{tr(tag.name)}
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="flex items-center justify-between text-xs text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <Calendar size={12} />
+                              {formatDate(post.published_at)}
+                            </span>
+
+                            <div className="flex items-center gap-3">
+                              <span className="flex items-center gap-1">
+                                <Eye size={12} />
+                                {post.view_count}
+                              </span>
+
+                              <span className="flex items-center gap-1">
+                                <MessageCircle size={12} />
+                                {post.comment_count}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </GlassCard>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </motion.div>
+
+          {posts.length === 0 ? (
+            <div className="text-center py-20 text-gray-400">
+              <p className="text-4xl mb-4">🔍</p>
+              <p>{tr("没有找到相关文章")}</p>
+            </div>
+          ) : null}
+
+          {totalPages > 1 ? (
+            <div className="flex items-center justify-center gap-4 mt-10">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() =>
+                  setPage((current) => Math.max(1, current - 1))
+                }
+                className="p-2 rounded-lg glass disabled:opacity-40 disabled:cursor-not-allowed hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
+                aria-label={tr("上一页")}
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <span className="text-sm text-gray-500">
+                {page} / {totalPages}
+              </span>
+
+              <button
+                type="button"
+                disabled={page >= totalPages}
+                onClick={() =>
+                  setPage((current) =>
+                    Math.min(totalPages, current + 1),
+                  )
+                }
+                className="p-2 rounded-lg glass disabled:opacity-40 disabled:cursor-not-allowed hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
+                aria-label={tr("下一页")}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   );
